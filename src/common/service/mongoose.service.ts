@@ -12,10 +12,20 @@ export interface PaginationSettings {
 /**
  * Base class to provide common crud operations in heir services
  *
- * Methods with "OrFail" postfix throw exception if cant find
+ * Methods with "OrFail" postfix throw exception if cant proceed
  */
 export abstract class MongooseService<Entity> {
   constructor(private entityModel: Model<Entity & Document>) {}
+
+  /**Scan entire collection to get count. Slow for big collections */
+  public async getTotalCount(): Promise<number> {
+    return await this.entityModel.countDocuments()
+  }
+
+  /**Get estimated documents count using collection metadata. Fast for big collections */
+  public async getEstimatedCount(): Promise<number> {
+    return await this.entityModel.estimatedDocumentCount()
+  }
 
   public async findByIdOrFail(id: string): Promise<Entity> {
     const entity = await this.findOneOrFail({
