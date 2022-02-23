@@ -11,9 +11,14 @@ export class UsersResolver {
   constructor(private usersService: UsersService, private productsService: ProductsService) {}
 
   @Query(() => [User], { name: "users" })
-  public async getUsers(@Args() pagination: PaginationArgs): Promise<User[]> {
+  public async getMany(@Args() pagination: PaginationArgs): Promise<User[]> {
     const filterQuery = {}
     return await this.usersService.findManyPaginated(filterQuery, pagination)
+  }
+
+  @Query(() => User, { name: "user" })
+  public async getById(@Args("userId") userId: string) {
+    return this.usersService.findByIdOrFail(userId)
   }
 
   @Mutation(() => User)
