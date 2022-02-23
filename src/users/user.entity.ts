@@ -24,7 +24,6 @@ export class User {
   @MongooseIdProp()
   id!: string
 
-  @Field()
   @Prop({ unique: true, immutable: true, required: true })
   username!: string
 
