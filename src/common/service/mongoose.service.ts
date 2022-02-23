@@ -46,6 +46,10 @@ export abstract class MongooseService<Entity> {
     return entity
   }
 
+  public async findMany(filter: EntityFilterQuery<Entity>) {
+    return this.entityModel.find(filter)
+  }
+
   public async findManyPaginated(
     filter: EntityFilterQuery<Entity>,
     paginationSettings: PaginationSettings
