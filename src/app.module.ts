@@ -6,13 +6,15 @@ import { appConfig } from "./common/config"
 
 import { GlobalRegistrarModule } from "./registrar/global-registrar.module"
 import { AuthenticationModule } from "./auth/authentication/authentication.module"
+import { ProductsModule } from "./products/products.module"
 
 @Module({
   imports: [
     GlobalRegistrarModule,
     AuthenticationModule,
     MongooseModule.forRoot(appConfig.database.mongoUri),
-    UsersModule
+    UsersModule,
+    ProductsModule
   ],
   providers: []
 })
