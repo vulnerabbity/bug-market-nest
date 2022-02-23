@@ -3,6 +3,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
 import { Document } from "mongoose"
 import { MongooseHashProp } from "src/common/decorators/mongoose/hash-prop.decorator"
 import { MongooseIdProp } from "src/common/decorators/mongoose/id-prop.decorator"
+import { Product } from "src/products/product.entity"
 
 export enum UserRolesEnum {
   SELLER = "seller",
@@ -42,6 +43,9 @@ export class User {
   @Field(() => [UserRolesEnum])
   @Prop({ type: [typeof UserRolesEnum] })
   roles!: UserRole[]
+
+  @Field(() => [Product])
+  products!: Product[]
 
   // TODO: ADD COUNTRY
   // TODO: ADD CITY
