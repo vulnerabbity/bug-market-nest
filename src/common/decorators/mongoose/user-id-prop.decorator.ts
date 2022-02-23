@@ -8,7 +8,7 @@ import { User } from "src/users/user.entity"
  *
  * Entity field should be string
  */
-export function UserIdProp(additionalOptions?: PropOptions) {
+export function MongooseUserIdProp(additionalOptions?: PropOptions) {
   const defaultOptions: PropOptions = {
     required: true,
     type: SchemaTypes.ObjectId,

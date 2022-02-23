@@ -5,6 +5,7 @@ import { SessionsModule } from "src/sessions/sessions.module"
 import { UsersModule } from "src/users/users.module"
 import { AuthenticationResolver } from "./authentication.resolver"
 import { AuthenticationService } from "./authentication.service"
+import { JwtStrategy } from "./strategies/jwt.strategy"
 
 @Module({
   imports: [
@@ -15,6 +16,6 @@ import { AuthenticationService } from "./authentication.service"
       signOptions: { algorithm: "RS256" }
     })
   ],
-  providers: [AuthenticationService, AuthenticationResolver]
+  providers: [AuthenticationService, AuthenticationResolver, JwtStrategy]
 })
 export class AuthenticationModule {}

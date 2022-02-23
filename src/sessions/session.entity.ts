@@ -3,7 +3,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
 import { Document } from "mongoose"
 import { MongooseIdProp } from "src/common/decorators/mongoose/id-prop.decorator"
 import { MongooseCreatedAtProp } from "src/common/decorators/mongoose/timestamps.decorator"
-import { UserIdProp } from "src/common/decorators/mongoose/user-id-prop.decorator"
+import { MongooseUserIdProp } from "src/common/decorators/mongoose/user-id-prop.decorator"
 
 export type SessionDocument = Document & Session
 
@@ -19,7 +19,7 @@ export class Session {
   userAgent!: string
 
   @Field()
-  @UserIdProp()
+  @MongooseUserIdProp()
   userId!: string
 
   @Field()
