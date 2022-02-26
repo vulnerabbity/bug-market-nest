@@ -1,6 +1,6 @@
-import { ExecutionContext, Injectable, InternalServerErrorException } from "@nestjs/common"
-import { GqlExecutionContext } from "@nestjs/graphql"
+import { Injectable, InternalServerErrorException } from "@nestjs/common"
 import { Request } from "express"
+import { AccessTokenPayload } from "src/auth/authentication/authentication.interface"
 import { RolesOwner } from "src/auth/authorization/abilities/abilities.interface"
 
 @Injectable()
@@ -17,6 +17,22 @@ export class RequestsParserService {
     }
 
     throw new InternalServerErrorException("Roles owner has no roles")
+  }
+
+  public parseUserIdOrFail(request: Request): string {
+    const accessTokenPayload = this.parseAccessTokenPayloadOrFail(request)
+    const userId = accessTokenPayload.sub
+
+    return userId
+  }
+
+  public parseAccessTokenPayloadOrFail(request: Request) {
+    const accessTokenPayload = request.user
+    if (accessTokenPayload === undefined) {
+      throw new InternalServerErrorException("Expected access token payload but got `undefined`")
+    }
+
+    return accessTokenPayload as AccessTokenPayload
   }
 
   private parseUserAgentOrUndefined(request: Request): string | undefined {
