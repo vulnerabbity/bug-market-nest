@@ -41,6 +41,7 @@
     "graphql": "^15.8.0",
     "mongodb": "^4.4.0",
     "mongoose": "^6.2.3",
+    "mongoose-fuzzy-searching": "^2.0.2",
     "passport": "^0.5.2",
     "passport-jwt": "^4.0.0",
     "reflect-metadata": "^0.1.13",

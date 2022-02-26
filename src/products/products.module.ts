@@ -7,10 +7,28 @@ import { ProductsService } from "./products.service"
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }]),
+    MongooseModule.forFeatureAsync([
+      {
+        name: Product.name,
+        useFactory: ProductSchemaSetup
+      }
+    ]),
     AbilitiesModule
   ],
   providers: [ProductsService, ProductsResolver],
   exports: [ProductsService]
 })
 export class ProductsModule {}
+
+function ProductSchemaSetup() {
+  const schema = ProductSchema
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  schema.plugin(require("mongoose-fuzzy-searching"), {
+    fields: [
+      { name: "name", weight: 10 },
+      { name: "description", minSize: 4 }
+    ]
+  })
+
+  return schema
+}

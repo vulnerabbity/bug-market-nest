@@ -4356,6 +4356,11 @@ mongodb@^4.4.0:
   optionalDependencies:
     saslprep "^1.0.3"
 
+mongoose-fuzzy-searching@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/mongoose-fuzzy-searching/-/mongoose-fuzzy-searching-2.0.2.tgz#16a25b198591ab41ac00f3a9d15d3328aa7a126c"
+  integrity sha512-Hbmx59VWJjQJDNdoyQ8bdECaqpis0pKoliWzf5eILzFs2KO7laUJpaQWJySN9OvdQS/gM9fURMSzQVQoLeZ3DA==
+
 mongoose@^6.2.3:
   version "6.2.3"
   resolved "https://registry.yarnpkg.com/mongoose/-/mongoose-6.2.3.tgz#146f718a8af95893827c5ab621697117be426256"
