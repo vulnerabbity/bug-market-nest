@@ -69,12 +69,26 @@ export abstract class MongooseService<Entity> {
     return createdEntity
   }
 
-  public async updateByIdOrFail(id: string, dto: Partial<Entity>): Promise<Entity> {
-    await this.entityModel.findByIdAndUpdate(id, dto)
+  public async updateByIdOrFail(id: string, update: Partial<Entity>): Promise<Entity> {
+    await this.entityModel.findByIdAndUpdate(id, update)
 
     const updatedEntity = await this.findByIdOrFail(id)
 
     return updatedEntity
+  }
+
+  public async updateOrFail(
+    filter: EntityFilterQuery<Entity>,
+    update: Partial<Entity>
+  ): Promise<Entity> {
+    await this.entityModel.updateOne(filter, update)
+
+    const updatedEntity = await this.findOneOrFail(filter)
+    return updatedEntity
+  }
+
+  public async isExists(filter: EntityFilterQuery<Entity>): Promise<boolean> {
+    return !!(await this.entityModel.exists(filter))
   }
 }
 
