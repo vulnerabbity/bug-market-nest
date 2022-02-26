@@ -18,7 +18,11 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "keygen": "node dist/shell-utils/keygen/main.js 1024",
+    "keygen:1024": "node dist/shell-utils/keygen/keygen.js 1024",
+    "keygen:2048": "node dist/shell-utils/keygen/keygen.js 2048",
+    "keygen:4096": "node dist/shell-utils/keygen/keygen.js 4096"
   },
   "dependencies": {
     "@casl/ability": "^5.4.3",
