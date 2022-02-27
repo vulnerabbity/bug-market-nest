@@ -13,9 +13,11 @@ import { ProductsService } from "./products.service"
 export class ProductsResolver {
   constructor(private productsService: ProductsService) {}
   @Query(() => [Product], { name: "products" })
-  public async getManyPaginated(@Args() pagination: PaginationArgs) {
-    const filterQuery = {}
-    return await this.productsService.findManyPaginated(filterQuery, pagination)
+  public async getManyPaginated(
+    @Args("searchQuery") search: string,
+    @Args() pagination: PaginationArgs
+  ) {
+    return await this.productsService.fuzzySearchPaginated(search, pagination)
   }
 
   @UseGuards(JwtGqlAuthenticationGuard)
