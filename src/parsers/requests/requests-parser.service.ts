@@ -10,7 +10,8 @@ export class RequestsParserService {
   }
 
   public parseRolesOwnerOrFail(request: Request): RolesOwner {
-    const rolesOwner = request.user as RolesOwner
+    const { sub: userId, roles } = request.user as AccessTokenPayload
+    const rolesOwner: RolesOwner = { id: userId, roles }
     const rolesOwnerHasRolesArray = Array.isArray(rolesOwner.roles)
     if (rolesOwnerHasRolesArray) {
       return rolesOwner
