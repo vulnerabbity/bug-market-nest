@@ -1,8 +1,5 @@
-import { NotFoundException } from "@nestjs/common"
-import { AnyObject, Document, FilterQuery, Model, isValidObjectId, ObjectId } from "mongoose"
-import { InvalidObjectIdException } from "../exceptions/mongoose/invalid-object-id.exception"
-
-type EntityFilterQuery<Entity extends AnyObject> = FilterQuery<Entity & Document>
+import { Document, FilterQuery, Model } from "mongoose"
+import { MongooseModelToServiceAdapter } from "./mongoose-model-to-service-adapter.service"
 
 export interface PaginationSettings {
   offset: number
@@ -10,92 +7,22 @@ export interface PaginationSettings {
 }
 
 /**
- * Base class to provide common crud operations in heir services
- *
- * Methods with "OrFail" postfix throw exception if cant proceed
+ * Extend this class if you want to use mongoose model in OOP style
  */
-export abstract class MongooseService<Entity> {
-  constructor(private entityModel: Model<Entity & Document>) {}
-
-  /**Scan entire collection to get count. Slow for big collections */
-  public async getTotalCount(): Promise<number> {
-    return await this.entityModel.countDocuments()
+export abstract class MongooseService<T> extends MongooseModelToServiceAdapter<T> {
+  constructor(documentModel: Model<T & Document>) {
+    super(documentModel)
   }
 
-  /**Get estimated documents count using collection metadata. Fast for big collections */
-  public async getEstimatedCount(): Promise<number> {
-    return await this.entityModel.estimatedDocumentCount()
-  }
+  public async isExists(filter: FilterQuery<T & Document>): Promise<boolean> {
+    // Optimization to retrieve only id instead of full document
+    const pickIdOnly = { _id: true }
+    const entityIdOrNull = await this.documentModel.findOne(filter, pickIdOnly)
 
-  public async findByIdOrFail(id: string): Promise<Entity> {
-    const entity = await this.findOneOrFail({
-      _id: parseObjectIdOrFail(id)
-    })
-
-    return entity
-  }
-
-  public async findOneOrFail(filter?: EntityFilterQuery<Entity>): Promise<Entity> {
-    filter = filter ?? {}
-    const entity = await this.entityModel.findOne(filter)
-
-    if (entity === null) {
-      throw new NotFoundException(`${this.entityModel.modelName} not found`)
+    if (entityIdOrNull === null) {
+      return false
     }
 
-    return entity
+    return true
   }
-
-  public async findMany(filter: EntityFilterQuery<Entity>) {
-    return this.entityModel.find(filter)
-  }
-
-  public async findManyPaginated(
-    filter: EntityFilterQuery<Entity>,
-    paginationSettings: PaginationSettings
-  ) {
-    const offset = paginationSettings.offset
-    const limit = paginationSettings.limit
-    return await this.entityModel.find(filter).skip(offset).limit(limit)
-  }
-
-  public async findAll(filter?: EntityFilterQuery<Entity>): Promise<Entity[]> {
-    filter = filter ?? {}
-    return await this.entityModel.find(filter)
-  }
-
-  public async createOrFail(dto: Partial<Entity>): Promise<Entity> {
-    const createdEntity = await this.entityModel.create(dto)
-    return createdEntity
-  }
-
-  public async updateByIdOrFail(id: string, update: Partial<Entity>): Promise<Entity> {
-    await this.entityModel.findByIdAndUpdate(id, update)
-
-    const updatedEntity = await this.findByIdOrFail(id)
-
-    return updatedEntity
-  }
-
-  public async updateOrFail(
-    filter: EntityFilterQuery<Entity>,
-    update: Partial<Entity>
-  ): Promise<Entity> {
-    await this.entityModel.updateOne(filter, update)
-
-    const updatedEntity = await this.findOneOrFail(filter)
-    return updatedEntity
-  }
-
-  public async isExists(filter: EntityFilterQuery<Entity>): Promise<boolean> {
-    return !!(await this.entityModel.exists(filter))
-  }
-}
-
-function parseObjectIdOrFail(id: string): ObjectId {
-  if (!isValidObjectId(id)) {
-    throw new InvalidObjectIdException()
-  }
-
-  return id as unknown as ObjectId
 }

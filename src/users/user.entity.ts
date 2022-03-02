@@ -1,8 +1,8 @@
 import { Field, ObjectType, registerEnumType } from "@nestjs/graphql"
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
 import { Document } from "mongoose"
+import { ObjectId } from "mongodb"
 import { MongooseHashProp } from "src/common/decorators/mongoose/hash-prop.decorator"
-import { MongooseIdProp } from "src/common/decorators/mongoose/id-prop.decorator"
 import { Product } from "src/products/product.entity"
 
 export enum UserRolesEnum {
@@ -20,9 +20,16 @@ export type UserDocument = User & Document
 @ObjectType()
 @Schema()
 export class User {
+  @Prop({ type: ObjectId })
+  _id!: ObjectId
+
   @Field()
-  @MongooseIdProp()
-  id!: string
+  get id(): string {
+    return String(this._id)
+  }
+  set id(value: string) {
+    this._id = new ObjectId(value)
+  }
 
   @Prop({ unique: true, immutable: true, required: true })
   username!: string
@@ -34,6 +41,15 @@ export class User {
   // TODO: Add length validation
   @MongooseHashProp({ required: true })
   password!: string
+
+  @Field()
+  @Prop({
+    default: function (this: User) {
+      return `${this.id}_avatar`
+    },
+    index: true
+  })
+  avatarUrl!: string
 
   @Field({ defaultValue: "N/A" })
   @Prop()

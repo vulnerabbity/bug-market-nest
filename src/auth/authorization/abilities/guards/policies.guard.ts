@@ -1,10 +1,6 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-  Injectable,
-} from "@nestjs/common"
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from "@nestjs/common"
 import { Reflector } from "@nestjs/core"
+import { InvalidPermissionsException } from "src/common/exceptions/authorization.exception"
 import { GraphqlParserService } from "src/parsers/graphql/graphql-parser.service"
 import { RequestsParserService } from "src/parsers/requests/requests-parser.service"
 import { PolicyHandler } from "../abilities.interface"
@@ -20,16 +16,14 @@ export class PoliciesGuard implements CanActivate {
     private reflector: Reflector,
     private caslAbilityFactory: CaslAbilityFactory,
     private graphqlParser: GraphqlParserService,
-    private requestParser: RequestsParserService,
+    private requestParser: RequestsParserService
   ) {}
 
   canActivate(executionContext: ExecutionContext): boolean {
     const isAllPoliciesAllowed = this.isAllPoliciesAllowed(executionContext)
 
     if (!isAllPoliciesAllowed) {
-      throw new ForbiddenException(
-        "Your user account don't have permissions to execute this action",
-      )
+      throw new InvalidPermissionsException()
     }
 
     return true
@@ -44,17 +38,12 @@ export class PoliciesGuard implements CanActivate {
 
     const userAbilities = this.caslAbilityFactory.createForRolesOwner(rolesOwner)
 
-    return policyHandlers.every(handler =>
-      this.executePolicyHandler(handler, userAbilities),
-    )
+    return policyHandlers.every(handler => this.executePolicyHandler(handler, userAbilities))
   }
 
   private getPolicyHandlers(executionContext: ExecutionContext): PolicyHandler[] {
-    const gqlHandler = this.graphqlParser.parseGraphqlHandler(executionContext)
-    const policyHandlers = this.reflector.get<PolicyHandler[]>(
-      CHECK_POLICIES_METADATA_KEY,
-      gqlHandler,
-    )
+    const handler = this.graphqlParser.parseGraphqlHandler(executionContext)
+    const policyHandlers = this.reflector.get<PolicyHandler[]>(CHECK_POLICIES_METADATA_KEY, handler)
 
     return policyHandlers
   }
