@@ -22,7 +22,7 @@ function isStringInArray(candidate: string, array: String[]): boolean {
   return array.some(arrayItem => arrayItem === candidate)
 }
 
-const ImageMimetypes = ["image/png", "image/jpg", "image/jpeg"]
+const ImageMimetypes = ["image/png", "image/jpg", "image/jpeg", "image/webp"]
 
 /**
  * Filters non images
