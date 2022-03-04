@@ -1,20 +1,23 @@
 import { Injectable } from "@nestjs/common"
-import { InjectModel } from "@nestjs/mongoose"
-import { Model } from "mongoose"
 import { MongooseService } from "src/common/service/mongoose.service"
-import { User, UserDocument } from "./user.entity"
+import { User, UserFilterQuery, UserModel } from "src/users/user.entity"
+import { InjectModel } from "@nestjs/mongoose"
 
 @Injectable()
 export class UsersService extends MongooseService<User> {
   constructor(
     @InjectModel(User.name)
-    private usersModel: Model<UserDocument>
+    private userModel: UserModel
   ) {
-    super(usersModel)
+    super(userModel)
   }
 
   public async findByUsernameOrFail(username: string): Promise<User> {
     return await this.findOneOrFail({ username })
+  }
+
+  async changePasswordOrFail(filter: UserFilterQuery, newPassword: string): Promise<void> {
+    await this.updateOrFail(filter, { password: newPassword })
   }
 
   /**
