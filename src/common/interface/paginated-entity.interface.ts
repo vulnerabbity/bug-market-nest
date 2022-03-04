@@ -1,3 +1,3 @@
 export abstract class IPaginatedEntity {
-  totalCount!: number
+  foundedCount!: number
 }
