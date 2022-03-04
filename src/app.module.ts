@@ -7,6 +7,7 @@ import { GlobalRegistrarModule } from "./registrar/global-registrar.module"
 import { AuthenticationModule } from "./auth/authentication/authentication.module"
 import { ProductsModule } from "./products/products.module"
 import { PublicFilesModule } from "./files/public/public-files.module"
+import { CategoriesModule } from "./categories/categories.module"
 
 @Module({
   imports: [
@@ -15,7 +16,8 @@ import { PublicFilesModule } from "./files/public/public-files.module"
     MongooseModule.forRoot(appConfig.database.mongoUri),
     UsersModule,
     ProductsModule,
-    PublicFilesModule
+    PublicFilesModule,
+    CategoriesModule
   ],
   providers: []
 })
