@@ -22,7 +22,8 @@
     "keygen": "node dist/shell-utils/keygen/keygen.js 1024",
     "keygen:1024": "node dist/shell-utils/keygen/keygen.js 1024",
     "keygen:2048": "node dist/shell-utils/keygen/keygen.js 2048",
-    "keygen:4096": "node dist/shell-utils/keygen/keygen.js 4096"
+    "keygen:4096": "node dist/shell-utils/keygen/keygen.js 4096",
+    "create-super-admin": "node dist/shell-utils/seeders/superadmin/main.js"
   },
   "dependencies": {
     "@casl/ability": "^5.4.3",
