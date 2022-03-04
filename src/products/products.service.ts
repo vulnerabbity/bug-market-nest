@@ -23,4 +23,11 @@ export class ProductsService extends MongooseService<Product> {
 
     return products
   }
+
+  public convertToCaslCompatible(databaseRetrievedProduct: Product) {
+    const caslProduct = new Product()
+    Object.assign(caslProduct, databaseRetrievedProduct)
+    caslProduct.userId = databaseRetrievedProduct.userId
+    return caslProduct
+  }
 }
