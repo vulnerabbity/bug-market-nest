@@ -13,13 +13,15 @@ export abstract class MongooseModelToServiceAdapter<T> {
   constructor(protected documentModel: Model<T & Document>) {}
 
   /**Scan entire collection to get count. Slow for big collections */
-  public async getTotalCount(): Promise<number> {
-    return await this.documentModel.countDocuments()
+  public async getTotalCount(filter?: FilterQuery<T & Document>): Promise<number> {
+    filter = filter ?? {}
+    return await this.documentModel.countDocuments(filter)
   }
 
   /**Get estimated documents count using collection metadata. Fast for big collections */
-  public async getEstimatedCount(): Promise<number> {
-    return await this.documentModel.estimatedDocumentCount()
+  public async getEstimatedCount(filter?: FilterQuery<T & Document>): Promise<number> {
+    filter = filter ?? {}
+    return await this.documentModel.estimatedDocumentCount(filter)
   }
 
   public async findByIdOrFail(id: string, projection?: any): Promise<T> {
@@ -27,7 +29,7 @@ export abstract class MongooseModelToServiceAdapter<T> {
     return await this.findOneOrFail({ _id: parsedId }, projection)
   }
 
-  public async findOneOrFail(filter?: FilterQuery<T & Document>, projection?: any): Promise<T> {
+  public async findOneOrFail(filter: FilterQuery<T & Document>, projection?: any): Promise<T> {
     filter = filter ?? {}
     const document = await this.documentModel.findOne(filter, projection)
 
@@ -81,7 +83,7 @@ export abstract class MongooseModelToServiceAdapter<T> {
   }
 }
 
-function parseObjectIdOrFail(id: string): ObjectId {
+export function parseObjectIdOrFail(id: string): ObjectId {
   if (!isValidObjectId(id)) {
     throw new InvalidObjectIdException()
   }
