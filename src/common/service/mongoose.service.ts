@@ -1,5 +1,9 @@
+import { NotFoundException } from "@nestjs/common"
 import { Document, FilterQuery, Model } from "mongoose"
-import { MongooseModelToServiceAdapter } from "./mongoose-model-to-service-adapter.service"
+import {
+  MongooseModelToServiceAdapter,
+  parseObjectIdOrFail
+} from "./mongoose-model-to-service-adapter.service"
 
 export interface PaginationSettings {
   offset: number
@@ -24,5 +28,17 @@ export abstract class MongooseService<T> extends MongooseModelToServiceAdapter<T
     }
 
     return true
+  }
+
+  public async failIfNotExists(filter: FilterQuery<T & Document>): Promise<void> {
+    const isDocumentExists = await this.isExists(filter)
+    if (isDocumentExists === false) {
+      throw new NotFoundException(`${this.documentModel.modelName} not found`)
+    }
+  }
+
+  public async failIfIdNotExists(id: string): Promise<void> {
+    const documentId = parseObjectIdOrFail(id)
+    return await this.failIfNotExists({ _id: documentId })
   }
 }
