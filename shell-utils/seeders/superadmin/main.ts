@@ -1,3 +1,4 @@
+import { userModel } from "src/users/user.entity"
 import { UsersService } from "src/users/users.service"
 import { DatabaseUtil } from "../utils/db.util"
 import {
@@ -7,7 +8,7 @@ import {
   newPasswordInputWithConfirm
 } from "../utils/shell"
 
-const usersService = new UsersService()
+const usersService = new UsersService(userModel)
 
 main()
 
