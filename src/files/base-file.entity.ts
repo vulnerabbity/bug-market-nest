@@ -1,11 +1,14 @@
 import { Prop, Schema } from "@nestjs/mongoose"
-import { MongooseIdProp } from "src/common/decorators/mongoose/id-prop.decorator"
+import { ObjectId } from "mongodb"
 import { MongooseIdReference } from "src/common/decorators/mongoose/id-reference.prop"
 
 @Schema()
 export class BaseFile {
-  @MongooseIdProp()
-  id!: string
+  _id!: ObjectId
+
+  get id() {
+    return String(this._id)
+  }
 
   @MongooseIdReference()
   userId!: string
