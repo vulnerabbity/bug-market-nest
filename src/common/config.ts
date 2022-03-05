@@ -1,32 +1,24 @@
-// Should be getters due nestjs config architecture
-// Nest defers initialization process.env
+import { config as useDotenv } from "dotenv"
+
+useDotenv()
 
 export const appConfig = {
   database: {
-    get mongoUri(): string {
-      return process.env.MONGO_URI!
-    }
+    mongoUri: process.env.MONGO_URI!
   },
   security: {
     tokens: {
       keys: {
-        get public() {
-          return parseConfigRsaKey(process.env.TOKENS_PUBLIC_KEY!)
-        },
-        get private(): string {
-          return parseConfigRsaKey(process.env.TOKENS_PRIVATE_KEY!)
-        }
+        public: parseConfigRsaKey(process.env.TOKENS_PUBLIC_KEY!),
+        private: parseConfigRsaKey(process.env.TOKENS_PRIVATE_KEY!)
       },
-      get accessTokenTTL() {
-        return process.env.ACCESS_TOKEN_TTL!
-      },
-      get refreshTokeTTL() {
-        return process.env.REFRESH_TOKEN_TTL!
-      }
+      accessTokenTTL: process.env.ACCESS_TOKEN_TTL!,
+      refreshTokeTTL: process.env.REFRESH_TOKEN_TTL!
     },
-    get bcryptSaltFactor(): number {
-      return parseInt(process.env.BCRYPT_SALT_FACTOR!)
-    }
+    bcryptSaltFactor: parseInt(process.env.BCRYPT_SALT_FACTOR!)
+  },
+  products: {
+    imageLimit: Number(process.env.PRODUCT_IMAGES_LIMIT!)
   }
 }
 

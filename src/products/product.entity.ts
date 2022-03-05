@@ -1,12 +1,13 @@
 import { Field, InputType, ObjectType } from "@nestjs/graphql"
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
 import { ObjectId } from "mongodb"
-import { Document, Model } from "mongoose"
+import { Document, Model, FilterQuery } from "mongoose"
 import { MongooseIdProp } from "src/common/decorators/mongoose/id-prop.decorator"
 import { MongooseIdReference } from "src/common/decorators/mongoose/id-reference.prop"
 
 export type ProductDocument = Document & Product
 export type ProductModel = Model<ProductDocument>
+export type ProductFilterQuery = FilterQuery<ProductDocument>
 
 @ObjectType()
 @InputType("ProductInput")
@@ -34,8 +35,9 @@ export class Product {
   @Prop()
   description!: string
 
+  @Field(() => [String])
   @Prop()
-  photos!: string[]
+  imagesUrls!: string[]
 
   @Field({ defaultValue: 0 })
   @Prop()
