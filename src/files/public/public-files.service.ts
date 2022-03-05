@@ -8,4 +8,8 @@ export class PublicFilesService extends BaseFileService<PublicFile> {
   constructor(@InjectModel(PublicFile.name) private publicFileModel: PublicFileModel) {
     super(publicFileModel)
   }
+
+  public async deleteByUrl(url: string) {
+    await this.deleteOneOrFail({ url })
+  }
 }
