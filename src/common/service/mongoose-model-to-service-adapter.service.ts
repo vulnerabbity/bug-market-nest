@@ -1,4 +1,4 @@
-import { NotFoundException } from "@nestjs/common"
+import { BadRequestException, NotFoundException } from "@nestjs/common"
 import { Model, Document, isValidObjectId, ObjectId, FilterQuery } from "mongoose"
 import { InvalidObjectIdException } from "../exceptions/mongoose/invalid-object-id.exception"
 import { PaginationSettings } from "./mongoose.service"
@@ -80,6 +80,22 @@ export abstract class MongooseModelToServiceAdapter<T> {
 
     const updatedDocument = await this.findOneOrFail(filter, projection)
     return updatedDocument
+  }
+
+  public async deleteOneOrFail(filter: FilterQuery<T & Document>): Promise<void> {
+    await this.findOneOrFail(filter)
+    await this.documentModel.deleteOne(filter)
+  }
+
+  public async deleteByIdOrFail(id: string): Promise<void> {
+    await this.deleteOneOrFail({ _id: id })
+  }
+
+  public async deleteManyOrFail(filter: FilterQuery<T & Document>): Promise<void> {
+    const { deletedCount } = await this.documentModel.deleteMany(filter)
+    if (deletedCount === 0) {
+      throw new BadRequestException("Nothing was deleted")
+    }
   }
 }
 
