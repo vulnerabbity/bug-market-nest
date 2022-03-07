@@ -1,3 +1,4 @@
+import { ModelsInjectorService } from "src/common/models/injector/models-injector.service"
 import { userModel } from "src/users/user.entity"
 import { UsersService } from "src/users/users.service"
 import { DatabaseUtil } from "../utils/db.util"
@@ -8,7 +9,10 @@ import {
   newPasswordInputWithConfirm
 } from "../utils/shell"
 
-const usersService = new UsersService(userModel)
+const modelInjector = new ModelsInjectorService()
+// Injecting manual because DI not working outside app
+modelInjector.userModel = userModel
+const usersService = new UsersService(modelInjector)
 
 main()
 

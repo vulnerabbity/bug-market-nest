@@ -51,7 +51,7 @@ export class ProductsResolver {
   ): Promise<Product> {
     const requester = this.requestsParser.parseRolesOwnerOrFail(req)
     const product = await this.productsService.findByIdOrFail(productId)
-    this.productsService.checkIfCanManageProduct(requester, product)
+    this.productsService.failIfUpdatingForbidden({ requester, subject: product })
 
     const categoryId = updateProductData.categoryId
     const needUpdateCategory = categoryId !== undefined
@@ -71,7 +71,7 @@ export class ProductsResolver {
   ): Promise<Product> {
     const requester = this.requestsParser.parseRolesOwnerOrFail(req)
     const product = await this.productsService.findByIdOrFail(productId)
-    this.productsService.checkIfCanManageProduct(requester, product)
+    this.productsService.failIfDeletingForbidden({ requester, subject: product })
 
     await this.productsService.deleteProductAndAllImagesById(productId)
     return product

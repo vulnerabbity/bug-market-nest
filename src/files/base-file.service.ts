@@ -2,7 +2,7 @@ import { Document, Model, FilterQuery } from "mongoose"
 import { MongooseService } from "src/common/service/mongoose.service"
 import { BaseFile } from "./base-file.entity"
 
-export class BaseFileService<T extends BaseFile> extends MongooseService<T> {
+export abstract class BaseFileService<T extends BaseFile> extends MongooseService<T> {
   constructor(private fileModel: Model<T & Document>) {
     super(fileModel)
   }
@@ -28,5 +28,9 @@ export class BaseFileService<T extends BaseFile> extends MongooseService<T> {
 
   public async getUserId(filter: FilterQuery<T>) {
     return await this.findOneOrFail(filter, { userId: true })
+  }
+
+  public async deleteByUrl(url: string) {
+    await this.deleteOneOrFail({ url })
   }
 }

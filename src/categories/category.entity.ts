@@ -1,7 +1,7 @@
 import { Field, InputType, ObjectType } from "@nestjs/graphql"
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
-import { ObjectId } from "mongodb"
 import { Model, model, Document } from "mongoose"
+import { MongooseIdProp } from "src/common/decorators/mongoose/id-prop.decorator"
 import { Product } from "src/products/product.entity"
 
 export type CategoryDocument = Document & Category
@@ -10,12 +10,9 @@ export type CategoryModel = Model<CategoryDocument>
 @Schema()
 @ObjectType()
 export class Category {
-  _id!: ObjectId
-
   @Field()
-  get id(): string {
-    return String(this._id)
-  }
+  @MongooseIdProp()
+  id!: string
 
   @Field()
   @Prop({ required: true, unique: true })

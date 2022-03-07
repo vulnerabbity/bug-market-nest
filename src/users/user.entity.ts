@@ -1,20 +1,12 @@
-import { Field, ObjectType, registerEnumType } from "@nestjs/graphql"
-import { InjectModel, Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
+import { Field, ObjectType } from "@nestjs/graphql"
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
 import { Document, Model, model, FilterQuery } from "mongoose"
-import { ObjectId } from "mongodb"
 import { MongooseHashProp } from "src/common/decorators/mongoose/hash-prop.decorator"
 import { Product } from "src/products/product.entity"
-
-export enum UserRolesEnum {
-  SELLER = "seller",
-  ADMIN = "admin",
-  SUPER_ADMIN = "super admin"
-}
-
-registerEnumType(UserRolesEnum, { name: "UserRolesEnum" })
-
-// converts enum to union type
-export type UserRole = `${UserRolesEnum}`
+import { UserRole, UserRolesEnum } from "./user.interface"
+import { IEntityWithId } from "src/common/interface/entities.interface"
+import { MongooseIdProp } from "src/common/decorators/mongoose/id-prop.decorator"
+import { subject } from "@casl/ability"
 
 export type UserDocument = User & Document
 
@@ -24,16 +16,10 @@ export type UserFilterQuery = FilterQuery<UserDocument>
 
 @ObjectType()
 @Schema()
-export class User {
-  _id!: ObjectId
-
+export class User implements IEntityWithId {
   @Field()
-  get id(): string {
-    return String(this._id)
-  }
-  set id(value: string) {
-    this._id = new ObjectId(value)
-  }
+  @MongooseIdProp()
+  id!: string
 
   @Prop({ unique: true, immutable: true, required: true })
   username!: string
@@ -46,14 +32,9 @@ export class User {
   @MongooseHashProp({ required: true })
   password!: string
 
-  @Field()
-  @Prop({
-    default: function (this: User) {
-      return `${this.id}_avatar`
-    },
-    index: true
-  })
-  avatarUrl!: string
+  @Field({ nullable: true })
+  @Prop()
+  avatarUrl?: string
 
   @Field({ defaultValue: "N/A" })
   @Prop()
@@ -68,7 +49,6 @@ export class User {
 
   // TODO: ADD COUNTRY
   // TODO: ADD CITY
-  // TODO: ADD PHONE
 }
 
 export const UserSchema = SchemaFactory.createForClass(User)

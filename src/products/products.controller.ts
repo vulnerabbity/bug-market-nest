@@ -42,7 +42,7 @@ export class ProductsController {
     const requester = this.requestsParser.parseRolesOwnerOrFail(request)
     const product = await this.productsService.findByIdOrFail(productId)
 
-    this.productsService.checkIfCanManageProduct(requester, product)
+    this.productsService.failIfUpdatingForbidden({ requester, subject: product })
 
     const newImageUrl = this.productsService.generateImageUrl({ product, imageIndex })
 
@@ -68,7 +68,7 @@ export class ProductsController {
     const requester = this.requestsParser.parseRolesOwnerOrFail(request)
     const product = await this.productsService.findByIdOrFail(productId)
 
-    this.productsService.checkIfCanManageProduct(requester, product)
+    this.productsService.failIfDeletingForbidden({ requester, subject: product })
 
     const productHasRequestedUrl = product.imagesUrls.includes(imageUrlToDelete)
 

@@ -1,7 +1,7 @@
-import { User, UserRole } from "src/users/user.entity"
+import { User } from "src/users/user.entity"
 import { AppAbility } from "./casl-ability.factory"
 
-export type RolesOwner = Pick<User, "id"> & Pick<User, "roles">
+export type RolesOwner = Pick<User, "id" | "roles">
 
 /**
  * Interface for class-style defining casl.js policy handler

@@ -1,6 +1,5 @@
 import { BadRequestException, NotFoundException } from "@nestjs/common"
-import { Model, Document, isValidObjectId, ObjectId, FilterQuery } from "mongoose"
-import { InvalidObjectIdException } from "../exceptions/mongoose/invalid-object-id.exception"
+import { Model, Document, FilterQuery } from "mongoose"
 import { PaginationSettings } from "./mongoose.service"
 
 /**
@@ -25,8 +24,7 @@ export abstract class MongooseModelToServiceAdapter<T> {
   }
 
   public async findByIdOrFail(id: string, projection?: any): Promise<T> {
-    const parsedId = parseObjectIdOrFail(id)
-    return await this.findOneOrFail({ _id: parsedId }, projection)
+    return await this.findOneOrFail({ id }, projection)
   }
 
   public async findOneOrFail(filter: FilterQuery<T & Document>, projection?: any): Promise<T> {
@@ -64,7 +62,7 @@ export abstract class MongooseModelToServiceAdapter<T> {
   }
 
   public async updateByIdOrFail(id: string, update: Partial<T>, projection?: any): Promise<T> {
-    await this.documentModel.findByIdAndUpdate(id, update)
+    await this.documentModel.findOneAndUpdate({ id }, update)
 
     const updatedDocument = await this.findByIdOrFail(id, projection)
 
@@ -88,7 +86,7 @@ export abstract class MongooseModelToServiceAdapter<T> {
   }
 
   public async deleteByIdOrFail(id: string): Promise<void> {
-    await this.deleteOneOrFail({ _id: id })
+    await this.deleteOneOrFail({ id: id })
   }
 
   public async deleteManyOrFail(filter: FilterQuery<T & Document>): Promise<void> {
@@ -97,12 +95,4 @@ export abstract class MongooseModelToServiceAdapter<T> {
       throw new BadRequestException("Nothing was deleted")
     }
   }
-}
-
-export function parseObjectIdOrFail(id: string): ObjectId {
-  if (!isValidObjectId(id)) {
-    throw new InvalidObjectIdException()
-  }
-
-  return id as unknown as ObjectId
 }

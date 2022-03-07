@@ -74,7 +74,7 @@ export class AuthenticationService {
   private makeAccessTokenPayload(user: User): AccessTokenPayload {
     const payload: AccessTokenPayload = {
       tokenType: "access",
-      sub: user.id,
+      userId: user.id,
       roles: user.roles
     }
     return payload
@@ -83,7 +83,7 @@ export class AuthenticationService {
   private makeRefreshTokenPayload(session: Session): RefreshTokenPayload {
     const payload: RefreshTokenPayload = {
       tokenType: "refresh",
-      sub: session.userId,
+      userId: session.userId,
       sessionId: session.id
     }
     return payload
