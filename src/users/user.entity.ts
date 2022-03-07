@@ -6,7 +6,8 @@ import { Product } from "src/products/product.entity"
 import { UserRole, UserRolesEnum } from "./user.interface"
 import { IEntityWithId } from "src/common/interface/entities.interface"
 import { MongooseIdProp } from "src/common/decorators/mongoose/id-prop.decorator"
-import { subject } from "@casl/ability"
+import { Max, MaxLength, MinLength } from "class-validator"
+import { Username } from "src/common/decorators/validation/class-validator"
 
 export type UserDocument = User & Document
 
@@ -21,14 +22,18 @@ export class User implements IEntityWithId {
   @MongooseIdProp()
   id!: string
 
+  @Username()
+  @MaxLength(32)
   @Prop({ unique: true, immutable: true, required: true })
   username!: string
 
+  @MaxLength(32)
   @Field({ defaultValue: "N/A" })
   @Prop()
   name!: string
 
-  // TODO: Add length validation
+  @MinLength(8)
+  @MaxLength(64)
   @MongooseHashProp({ required: true })
   password!: string
 
@@ -36,6 +41,7 @@ export class User implements IEntityWithId {
   @Prop()
   avatarUrl?: string
 
+  @Max(500)
   @Field({ defaultValue: "N/A" })
   @Prop()
   about!: string
