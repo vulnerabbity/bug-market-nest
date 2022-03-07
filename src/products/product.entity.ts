@@ -1,9 +1,10 @@
 import { Field, InputType, ObjectType } from "@nestjs/graphql"
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
-import { ObjectId } from "mongodb"
+import { MaxLength, Min, MinLength } from "class-validator"
 import { Document, Model, FilterQuery } from "mongoose"
 import { MongooseIdProp } from "src/common/decorators/mongoose/id-prop.decorator"
 import { MongooseForeignKeyProp } from "src/common/decorators/mongoose/id-reference.prop"
+import { UUID_V4 } from "src/common/decorators/validation/class-validator"
 import { IEntityWithId } from "src/common/interface/entities.interface"
 
 export type ProductDocument = Document & Product
@@ -18,6 +19,8 @@ export class Product implements IEntityWithId {
   @MongooseIdProp()
   id!: string
 
+  @MinLength(2)
+  @MaxLength(64)
   @Field()
   @Prop()
   name!: string
@@ -26,10 +29,12 @@ export class Product implements IEntityWithId {
   @MongooseForeignKeyProp()
   userId!: string
 
+  @UUID_V4()
   @Field()
   @MongooseForeignKeyProp()
   categoryId!: string
 
+  @MaxLength(1000)
   @Field({ defaultValue: "N/A" })
   @Prop()
   description!: string
@@ -38,6 +43,7 @@ export class Product implements IEntityWithId {
   @Prop()
   imagesUrls!: string[]
 
+  @Min(0)
   @Field({ defaultValue: 0 })
   @Prop()
   price!: number
