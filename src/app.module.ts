@@ -1,4 +1,3 @@
-import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo"
 import { Module } from "@nestjs/common"
 import { MongooseModule } from "@nestjs/mongoose"
 import { UsersModule } from "src/users/users.module"
