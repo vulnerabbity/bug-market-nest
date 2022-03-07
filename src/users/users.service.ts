@@ -1,8 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common"
-import { MongooseService } from "src/common/service/mongoose.service"
 import { User, UserFilterQuery, UserModel } from "src/users/user.entity"
 import { InjectModel } from "@nestjs/mongoose"
-import { CaslAbilityFactory } from "src/auth/authorization/abilities/casl-ability.factory"
 import { UploadAvatarDto } from "./user.interface"
 import { PublicFilesService } from "src/files/public/public-files.service"
 import { PublicFileDto } from "src/files/public/dto/public-file.dto"
