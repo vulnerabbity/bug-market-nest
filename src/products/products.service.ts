@@ -1,8 +1,7 @@
 import { Injectable } from "@nestjs/common"
-import { InjectModel } from "@nestjs/mongoose"
 import { MongooseFuzzyModel } from "mongoose-fuzzy-search"
 import { CategoriesService } from "src/categories/categories.service"
-import { Category, CategoryModel } from "src/categories/category.entity"
+import { ModelsInjectorService } from "src/common/models/injector/models-injector.service"
 import { MongooseCaslService } from "src/common/service/mongoose-casl.service"
 import { PaginationSettings } from "src/common/service/mongoose.service"
 import { PublicFileDto } from "src/files/public/dto/public-file.dto"
@@ -13,16 +12,15 @@ export type ProductFuzzyModel = ProductModel & MongooseFuzzyModel<ProductDocumen
 
 @Injectable()
 export class ProductsService extends MongooseCaslService<Product> {
-  private categoriesService = new CategoriesService(this.categoryModel)
+  private productModel = this.modelsInjector.productModel
+  private categoryModel = this.modelsInjector.categoryModel
+  private categoriesService = new CategoriesService(this.modelsInjector)
 
   constructor(
-    @InjectModel(Product.name)
-    private productModel: ProductFuzzyModel,
     private publicFilesService: PublicFilesService,
-    @InjectModel(Category.name)
-    private categoryModel: CategoryModel
+    private modelsInjector: ModelsInjectorService
   ) {
-    super(productModel)
+    super(modelsInjector.productModel)
   }
 
   public async fuzzySearchPaginated(

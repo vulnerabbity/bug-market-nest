@@ -1,21 +1,18 @@
 import { Inject, Injectable } from "@nestjs/common"
-import { User, UserFilterQuery, UserModel } from "src/users/user.entity"
-import { InjectModel } from "@nestjs/mongoose"
+import { User, UserFilterQuery } from "src/users/user.entity"
 import { UploadAvatarDto } from "./user.interface"
 import { PublicFilesService } from "src/files/public/public-files.service"
 import { PublicFileDto } from "src/files/public/dto/public-file.dto"
 import { MongooseCaslService } from "src/common/service/mongoose-casl.service"
+import { ModelsInjectorService } from "src/common/models/injector/models-injector.service"
 
 @Injectable()
 export class UsersService extends MongooseCaslService<User> {
   @Inject()
   private publicFilesService!: PublicFilesService
 
-  constructor(
-    @InjectModel(User.name)
-    private userModel: UserModel
-  ) {
-    super(userModel)
+  constructor(private modelsInjector: ModelsInjectorService) {
+    super(modelsInjector.userModel)
   }
 
   public async findByUsernameOrFail(username: string): Promise<User> {

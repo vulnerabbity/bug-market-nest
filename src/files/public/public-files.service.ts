@@ -1,15 +1,11 @@
 import { Injectable } from "@nestjs/common"
-import { InjectModel } from "@nestjs/mongoose"
+import { ModelsInjectorService } from "src/common/models/injector/models-injector.service"
 import { BaseFileService } from "../base-file.service"
-import { PublicFile, PublicFileModel } from "./public-file.entity"
+import { PublicFile } from "./public-file.entity"
 
 @Injectable()
 export class PublicFilesService extends BaseFileService<PublicFile> {
-  constructor(@InjectModel(PublicFile.name) private publicFileModel: PublicFileModel) {
-    super(publicFileModel)
-  }
-
-  public async deleteByUrl(url: string) {
-    await this.deleteOneOrFail({ url })
+  constructor(private modelsInjector: ModelsInjectorService) {
+    super(modelsInjector.publicFileModel)
   }
 }

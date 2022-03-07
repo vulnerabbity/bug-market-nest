@@ -3,7 +3,6 @@ import { ConfigModule } from "@nestjs/config"
 import { ParsersModule } from "src/parsers/parsers.module"
 import { FiltersGlobalRegistrarModule } from "./filters-registrar.module"
 import { GraphqlRegistrarModule } from "./graphql-registrar.module"
-import { ModelsModule } from "./models.module"
 
 // Place to register things that will make app.module.ts ugly
 @Module({
@@ -11,8 +10,7 @@ import { ModelsModule } from "./models.module"
     ConfigModule.forRoot(),
     GraphqlRegistrarModule,
     FiltersGlobalRegistrarModule,
-    ParsersModule,
-    ModelsModule
+    ParsersModule
   ],
   exports: [FiltersGlobalRegistrarModule, ParsersModule]
 })
