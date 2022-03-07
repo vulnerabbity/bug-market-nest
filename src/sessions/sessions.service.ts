@@ -6,13 +6,13 @@ import { MongooseService } from "src/common/service/mongoose.service"
 import { RequestsParserService } from "src/parsers/requests/requests-parser.service"
 import { User } from "src/users/user.entity"
 import { CreateSessionDto } from "./dto/create-session.dto"
-import { Session, SessionDocument } from "./session.entity"
+import { Session, SessionDocument, SessionModel } from "./session.entity"
 
 @Injectable()
 export class SessionsService extends MongooseService<Session> {
   constructor(
     @InjectModel(Session.name)
-    private sessionModel: Model<SessionDocument>,
+    private sessionModel: SessionModel,
     private requestsParser: RequestsParserService
   ) {
     super(sessionModel)

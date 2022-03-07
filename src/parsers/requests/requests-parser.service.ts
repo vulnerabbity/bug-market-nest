@@ -10,7 +10,7 @@ export class RequestsParserService {
   }
 
   public parseRolesOwnerOrFail(request: Request): RolesOwner {
-    const { sub: userId, roles } = request.user as AccessTokenPayload
+    const { userId, roles } = request.user as AccessTokenPayload
     const rolesOwner: RolesOwner = { id: userId, roles }
     const rolesOwnerHasRolesArray = Array.isArray(rolesOwner.roles)
     if (rolesOwnerHasRolesArray) {
@@ -22,7 +22,7 @@ export class RequestsParserService {
 
   public parseUserIdOrFail(request: Request): string {
     const accessTokenPayload = this.parseAccessTokenPayloadOrFail(request)
-    const userId = accessTokenPayload.sub
+    const userId = accessTokenPayload.userId
 
     return userId
   }

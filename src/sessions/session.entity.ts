@@ -1,15 +1,17 @@
 import { Field, ObjectType } from "@nestjs/graphql"
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
-import { Document } from "mongoose"
+import { Document, Model } from "mongoose"
 import { MongooseIdProp } from "src/common/decorators/mongoose/id-prop.decorator"
-import { MongooseIdReference } from "src/common/decorators/mongoose/id-reference.prop"
+import { MongooseForeignKeyProp } from "src/common/decorators/mongoose/id-reference.prop"
 import { MongooseCreatedAtProp } from "src/common/decorators/mongoose/timestamps.decorator"
+import { IEntityWithId } from "src/common/interface/entities.interface"
 
 export type SessionDocument = Document & Session
+export type SessionModel = Model<SessionDocument>
 
 @Schema()
 @ObjectType()
-export class Session {
+export class Session implements IEntityWithId {
   @Field()
   @MongooseIdProp()
   id!: string
@@ -19,7 +21,7 @@ export class Session {
   userAgent!: string
 
   @Field()
-  @MongooseIdReference()
+  @MongooseForeignKeyProp()
   userId!: string
 
   @Field()

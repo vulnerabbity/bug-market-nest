@@ -1,12 +1,10 @@
 import { Injectable } from "@nestjs/common"
 import { InjectModel } from "@nestjs/mongoose"
 import { MongooseFuzzyModel } from "mongoose-fuzzy-search"
-import { RolesOwner } from "src/auth/authorization/abilities/abilities.interface"
-import { CaslAbilityFactory } from "src/auth/authorization/abilities/casl-ability.factory"
 import { CategoriesService } from "src/categories/categories.service"
 import { Category, CategoryModel } from "src/categories/category.entity"
-import { InvalidPermissionsException } from "src/common/exceptions/authorization.exception"
-import { MongooseService, PaginationSettings } from "src/common/service/mongoose.service"
+import { MongooseCaslService } from "src/common/service/mongoose-casl.service"
+import { PaginationSettings } from "src/common/service/mongoose.service"
 import { PublicFileDto } from "src/files/public/dto/public-file.dto"
 import { PublicFilesService } from "src/files/public/public-files.service"
 import { Product, ProductDocument, ProductFilterQuery, ProductModel } from "./product.entity"
@@ -14,14 +12,13 @@ import { Product, ProductDocument, ProductFilterQuery, ProductModel } from "./pr
 export type ProductFuzzyModel = ProductModel & MongooseFuzzyModel<ProductDocument>
 
 @Injectable()
-export class ProductsService extends MongooseService<Product> {
+export class ProductsService extends MongooseCaslService<Product> {
   private categoriesService = new CategoriesService(this.categoryModel)
 
   constructor(
     @InjectModel(Product.name)
     private productModel: ProductFuzzyModel,
     private publicFilesService: PublicFilesService,
-    private abilityFactory: CaslAbilityFactory,
     @InjectModel(Category.name)
     private categoryModel: CategoryModel
   ) {
@@ -48,7 +45,7 @@ export class ProductsService extends MongooseService<Product> {
   }
 
   public async deleteProductAndAllImagesById(id: string): Promise<void> {
-    await this.deleteProductAndAllImages({ _id: id })
+    await this.deleteProductAndAllImages({ id })
   }
 
   public async deleteProductAndAllImages(filter: ProductFilterQuery): Promise<void> {
@@ -62,17 +59,6 @@ export class ProductsService extends MongooseService<Product> {
   public generateImageUrl({ product, imageIndex }: { product: Product; imageIndex: number }) {
     const productId = product.id
     return `${productId}_${imageIndex}`
-  }
-
-  public checkIfCanManageProduct(requester: RolesOwner, product: Product) {
-    product = this.convertToCaslCompatible(product)
-
-    const requesterAbilities = this.abilityFactory.createForRolesOwner(requester)
-    const canUpdate = requesterAbilities.can("manage", product)
-
-    if (canUpdate === false) {
-      throw new InvalidPermissionsException()
-    }
   }
 
   public async failIfCategoryIdNotExists(categoryId: string) {
@@ -102,12 +88,5 @@ export class ProductsService extends MongooseService<Product> {
   private async updateImagesUrls(newUrls: string[], { id: productId }: Product): Promise<Product> {
     const sortedNewUrls = [...newUrls].sort()
     return await this.updateByIdOrFail(productId, { imagesUrls: sortedNewUrls })
-  }
-
-  private convertToCaslCompatible(databaseRetrievedProduct: Product) {
-    const caslProduct = new Product()
-    Object.assign(caslProduct, databaseRetrievedProduct)
-    caslProduct.userId = databaseRetrievedProduct.userId
-    return caslProduct
   }
 }

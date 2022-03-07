@@ -2,16 +2,21 @@ import {
   InferSubjects,
   Ability,
   AbilityBuilder,
-  ExtractSubjectType,
-  AbilityClass
+  AbilityClass,
+  ExtractSubjectType
 } from "@casl/ability"
 import { Injectable } from "@nestjs/common"
+import { InjectModel } from "@nestjs/mongoose"
 import { Category } from "src/categories/category.entity"
-import { Product } from "src/products/product.entity"
-import { User, UserRole } from "src/users/user.entity"
+import { Product, ProductModel } from "src/products/product.entity"
+import { User, UserModel } from "src/users/user.entity"
+import { UserRole } from "src/users/user.interface"
 import { RolesOwner } from "./abilities.interface"
 
-type Subjects = InferSubjects<typeof User | typeof Product | typeof Category> | "all"
+type SubjectsEntities = typeof User | typeof Product | typeof Category
+type SubjectsModels = UserModel | ProductModel
+
+export type Subjects = InferSubjects<SubjectsEntities | SubjectsModels | typeof Category> | "all"
 
 export type Action = "manage" | "create" | "read" | "update" | "delete"
 
@@ -19,9 +24,15 @@ export type AppAbility = Ability<[Action, Subjects]>
 
 @Injectable()
 export class CaslAbilityFactory {
+  @InjectModel(User.name)
+  private ConcreteUser!: UserModel
+
+  @InjectModel(Product.name)
+  private ConcreteProduct!: ProductModel
+
   constructor() {}
   createForRolesOwner(rolesOwner: RolesOwner) {
-    const { can, cannot, build } = new AbilityBuilder<Ability<[Action, Subjects]>>(
+    const { can, build } = new AbilityBuilder<Ability<[Action, Subjects]>>(
       Ability as AbilityClass<AppAbility>
     )
 
@@ -38,9 +49,13 @@ export class CaslAbilityFactory {
     }
 
     if (hasRole("seller")) {
-      can("manage", User, { id: rolesOwner.id }).because("You can only can manage yourself")
+      can("manage", this.ConcreteUser, { id: rolesOwner.id }).because(
+        "You can only can manage yourself"
+      )
       can("read", Product)
-      can("manage", Product, { userId: rolesOwner.id }).because("You can only manage your products")
+      can("manage", this.ConcreteProduct, { userId: rolesOwner.id }).because(
+        "You can only manage your products"
+      )
     }
 
     return build({

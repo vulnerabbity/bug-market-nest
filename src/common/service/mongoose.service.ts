@@ -1,9 +1,7 @@
 import { NotFoundException } from "@nestjs/common"
 import { Document, FilterQuery, Model } from "mongoose"
-import {
-  MongooseModelToServiceAdapter,
-  parseObjectIdOrFail
-} from "./mongoose-model-to-service-adapter.service"
+import { IEntityWithId } from "../interface/entities.interface"
+import { MongooseModelToServiceAdapter } from "./mongoose-model-to-service-adapter.service"
 
 export interface PaginationSettings {
   offset: number
@@ -13,14 +11,16 @@ export interface PaginationSettings {
 /**
  * Extend this class if you want to use mongoose model in OOP style
  */
-export abstract class MongooseService<T> extends MongooseModelToServiceAdapter<T> {
+export abstract class MongooseService<
+  T extends IEntityWithId
+> extends MongooseModelToServiceAdapter<T> {
   constructor(documentModel: Model<T & Document>) {
     super(documentModel)
   }
 
   public async isExists(filter: FilterQuery<T & Document>): Promise<boolean> {
     // Optimization to retrieve only id instead of full document
-    const pickIdOnly = { _id: true }
+    const pickIdOnly = { id: true }
     const entityIdOrNull = await this.documentModel.findOne(filter, pickIdOnly)
 
     if (entityIdOrNull === null) {
@@ -38,7 +38,6 @@ export abstract class MongooseService<T> extends MongooseModelToServiceAdapter<T
   }
 
   public async failIfIdNotExists(id: string): Promise<void> {
-    const documentId = parseObjectIdOrFail(id)
-    return await this.failIfNotExists({ _id: documentId })
+    return await this.failIfNotExists({ id })
   }
 }

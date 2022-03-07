@@ -1,16 +1,14 @@
 import { Prop, Schema } from "@nestjs/mongoose"
-import { ObjectId } from "mongodb"
-import { MongooseIdReference } from "src/common/decorators/mongoose/id-reference.prop"
+import { MongooseIdProp } from "src/common/decorators/mongoose/id-prop.decorator"
+import { MongooseForeignKeyProp } from "src/common/decorators/mongoose/id-reference.prop"
+import { IEntityWithId } from "src/common/interface/entities.interface"
 
 @Schema()
-export class BaseFile {
-  _id!: ObjectId
+export class BaseFile implements IEntityWithId {
+  @MongooseIdProp()
+  id!: string
 
-  get id() {
-    return String(this._id)
-  }
-
-  @MongooseIdReference()
+  @MongooseForeignKeyProp()
   userId!: string
 
   @Prop({ required: true })

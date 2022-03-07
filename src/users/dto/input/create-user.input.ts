@@ -1,5 +1,5 @@
-import { Args, ArgsType, Field, InputType, OmitType } from "@nestjs/graphql"
-import { UserRole } from "src/users/user.entity"
+import { Args, Field, InputType, OmitType } from "@nestjs/graphql"
+import { UserRole } from "src/users/user.interface"
 import { UserInput } from "./user.input"
 
 @InputType()

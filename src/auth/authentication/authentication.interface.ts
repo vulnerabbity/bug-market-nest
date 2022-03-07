@@ -1,5 +1,5 @@
 import { Field, ObjectType } from "@nestjs/graphql"
-import { UserRole } from "src/users/user.entity"
+import { UserRole } from "src/users/user.interface"
 
 export type AccessTokenType = "access"
 export type RefreshTokenType = "refresh"
@@ -7,8 +7,7 @@ export type TokenType = AccessTokenType | RefreshTokenType
 
 export interface TokenPayload {
   tokenType: TokenType
-  // Jwt subject; Id of user
-  sub: string
+  userId: string
   iat?: number
   exp?: number
 }
