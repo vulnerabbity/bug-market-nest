@@ -19,6 +19,9 @@ export const appConfig = {
   },
   products: {
     imageLimit: Number(process.env.PRODUCT_IMAGES_LIMIT!)
+  },
+  APIs: {
+    geonamesUsername: process.env.GEONAMES_USERNAME!
   }
 }
 
