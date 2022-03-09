@@ -8,6 +8,7 @@ import { ProductsModule } from "./products/products.module"
 import { PublicFilesModule } from "./files/public/public-files.module"
 import { CategoriesModule } from "./categories/categories.module"
 import { ModelsInjectorModule } from "./common/models/injector/models-injector.module"
+import { LocationsModule } from "./locations/locations.module"
 
 @Module({
   imports: [
@@ -18,7 +19,8 @@ import { ModelsInjectorModule } from "./common/models/injector/models-injector.m
     ProductsModule,
     PublicFilesModule,
     CategoriesModule,
-    ModelsInjectorModule
+    ModelsInjectorModule,
+    LocationsModule
   ],
   providers: []
 })
