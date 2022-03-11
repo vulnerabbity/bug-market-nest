@@ -36,7 +36,7 @@ export class Product implements IEntityWithId {
   categoryId!: string
 
   @MaxLength(1000)
-  @Field({ defaultValue: "N/A" })
+  @Field({ nullable: true })
   @Prop()
   description!: string
 

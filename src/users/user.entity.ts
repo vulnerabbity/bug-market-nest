@@ -32,9 +32,9 @@ export class User implements IEntityWithId {
   username!: string
 
   @MaxLength(32)
-  @Field({ defaultValue: "N/A" })
+  @Field({ nullable: true })
   @Prop()
-  name!: string
+  name?: string
 
   @MinLength(8)
   @MaxLength(64)
@@ -46,9 +46,9 @@ export class User implements IEntityWithId {
   avatarUrl?: string
 
   @MaxLength(500)
-  @Field({ defaultValue: "N/A" })
+  @Field({ nullable: true })
   @Prop()
-  about!: string
+  about?: string
 
   @Field(() => [UserRolesEnum])
   @Prop({ type: [typeof UserRolesEnum] })
