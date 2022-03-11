@@ -1,6 +1,4 @@
-import { Type } from "@nestjs/common"
 import { Field, InputType, ObjectType, OmitType } from "@nestjs/graphql"
-import { CopyType } from "src/common/decorators/graphql/class-mappers"
 import { IPaginatedEntities } from "src/common/interface/paginated-entity.interface"
 
 @ObjectType({ isAbstract: true })
@@ -24,10 +22,10 @@ export class PaginatedLocationEntities implements IPaginatedEntities<LocationEnt
 }
 
 @ObjectType()
-export class City extends CopyType(LocationEntity) {}
+export class City extends OmitType(LocationEntity, []) {}
 
 @ObjectType()
-export class Country extends CopyType(LocationEntity) {}
+export class Country extends OmitType(LocationEntity, []) {}
 
 @ObjectType()
 export class PaginatedCities extends IPaginatedEntities<City> {

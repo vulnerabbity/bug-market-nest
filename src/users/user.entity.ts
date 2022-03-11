@@ -6,8 +6,12 @@ import { Product } from "src/products/product.entity"
 import { UserRole, UserRolesEnum } from "./user.interface"
 import { IEntityWithId } from "src/common/interface/entities.interface"
 import { MongooseIdProp } from "src/common/decorators/mongoose/id-prop.decorator"
-import { Max, MaxLength, MinLength } from "class-validator"
+import { MaxLength, MinLength } from "class-validator"
 import { Username } from "src/common/decorators/validation/class-validator"
+import {
+  Iso3166CountriesCodesEnum,
+  Iso3166CountryCode
+} from "src/locations/interfaces/iso-3166.interface"
 
 export type UserDocument = User & Document
 
@@ -41,7 +45,7 @@ export class User implements IEntityWithId {
   @Prop()
   avatarUrl?: string
 
-  @Max(500)
+  @MaxLength(500)
   @Field({ defaultValue: "N/A" })
   @Prop()
   about!: string
@@ -50,11 +54,16 @@ export class User implements IEntityWithId {
   @Prop({ type: [typeof UserRolesEnum] })
   roles!: UserRole[]
 
+  @Field({ nullable: true })
+  @Prop({ index: true })
+  cityId?: number
+
+  @Field(() => Iso3166CountriesCodesEnum, { nullable: true })
+  @Prop({ index: true })
+  countryCode?: Iso3166CountryCode
+
   @Field(() => [Product])
   products!: Product[]
-
-  // TODO: ADD COUNTRY
-  // TODO: ADD CITY
 }
 
 export const UserSchema = SchemaFactory.createForClass(User)

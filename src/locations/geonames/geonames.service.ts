@@ -17,7 +17,7 @@ export class GeonamesService {
   private apiSingleUrl = "http://api.geonames.org/get?"
   private apiUsername = appConfig.APIs.geonamesUsername
 
-  protected async fetchSingle(query: SearchSingleQuery): Promise<GeonamesEntity> {
+  protected async fetchSingleOrFail(query: SearchSingleQuery): Promise<GeonamesEntity> {
     const requestParams = this.convertSearchSingleQueryToRequestParams(query)
     let apiResponse: AxiosResponse<string>
     try {
@@ -25,7 +25,7 @@ export class GeonamesService {
     } catch (error: any) {
       const isNotFound = error.response.status === 404
       if (isNotFound) {
-        throw new NotFoundException()
+        throw new NotFoundException("Location not found")
       }
       throw new InternalServerErrorException()
     }
@@ -34,7 +34,7 @@ export class GeonamesService {
     return parsedGeonameEntity
   }
 
-  protected async fetchMany(
+  protected async fetchManyOrFail(
     query: SearchManyQuery,
     featureCode: string
   ): Promise<GeonamesPaginatedEntities> {
