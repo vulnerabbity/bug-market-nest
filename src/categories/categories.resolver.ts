@@ -2,7 +2,7 @@ import { Inject } from "@nestjs/common"
 import { Args, Mutation, Parent, Query, ResolveField, Resolver } from "@nestjs/graphql"
 import { CheckPolicies } from "src/auth/authorization/abilities/decorators/check-policies.decorator"
 import { PaginationArgs } from "src/common/args/pagination.args"
-import { Product } from "src/products/product.entity"
+import { PaginatedProducts, Product } from "src/products/product.entity"
 import { ProductsService } from "src/products/products.service"
 import { CategoriesService } from "./categories.service"
 import { Category } from "./category.entity"
@@ -33,7 +33,7 @@ export class CategoriesResolver {
   public async resolveProducts(
     @Parent() currentCategory: Category,
     @Args() pagination: PaginationArgs
-  ): Promise<Product[]> {
+  ): Promise<PaginatedProducts> {
     return await this.productsService.findManyPaginated(
       { categoryId: currentCategory.id },
       pagination

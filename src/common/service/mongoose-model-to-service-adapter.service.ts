@@ -1,5 +1,6 @@
 import { BadRequestException, NotFoundException } from "@nestjs/common"
 import { Model, Document, FilterQuery } from "mongoose"
+import { IPaginatedEntities } from "../interface/paginated-entity.interface"
 import { PaginationSettings } from "./mongoose.service"
 
 /**
@@ -46,10 +47,12 @@ export abstract class MongooseModelToServiceAdapter<T> {
     filter: FilterQuery<T & Document>,
     paginationSettings: PaginationSettings,
     projection?: any
-  ) {
+  ): Promise<IPaginatedEntities<T>> {
     const offset = paginationSettings.offset
     const limit = paginationSettings.limit
-    return await this.documentModel.find(filter, projection).skip(offset).limit(limit)
+    const documents = await this.documentModel.find(filter, projection).skip(offset).limit(limit)
+    const resultsNumber = await this.documentModel.estimatedDocumentCount(filter)
+    return { data: documents, totalResultsCount: resultsNumber }
   }
 
   public async findAll(filter?: FilterQuery<T>, projection?: any): Promise<T[]> {

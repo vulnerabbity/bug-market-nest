@@ -12,6 +12,7 @@ import {
   Iso3166CountriesCodesEnum,
   Iso3166CountryCode
 } from "src/locations/interfaces/iso-3166.interface"
+import { IPaginatedEntities } from "src/common/interface/paginated-entity.interface"
 
 export type UserDocument = User & Document
 
@@ -64,6 +65,12 @@ export class User implements IEntityWithId {
 
   @Field(() => [Product])
   products!: Product[]
+}
+
+@ObjectType()
+export class PaginatedUsers implements IPaginatedEntities<User> {
+  data!: User[]
+  totalResultsCount!: number
 }
 
 export const UserSchema = SchemaFactory.createForClass(User)
