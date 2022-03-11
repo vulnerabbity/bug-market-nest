@@ -6,6 +6,7 @@ import { MongooseIdProp } from "src/common/decorators/mongoose/id-prop.decorator
 import { MongooseForeignKeyProp } from "src/common/decorators/mongoose/id-reference.prop"
 import { UUID_V4 } from "src/common/decorators/validation/class-validator"
 import { IEntityWithId } from "src/common/interface/entities.interface"
+import { IPaginatedEntities } from "src/common/interface/paginated-entity.interface"
 import { ProductFuzzyModel } from "./products.service"
 
 export type ProductDocument = Document & Product
@@ -48,6 +49,14 @@ export class Product implements IEntityWithId {
   @Field({ defaultValue: 0 })
   @Prop()
   price!: number
+}
+
+@ObjectType()
+export class PaginatedProducts extends IPaginatedEntities<Product> {
+  @Field(() => [Product])
+  data!: Product[]
+  @Field()
+  totalResultsCount!: number
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product)

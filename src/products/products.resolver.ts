@@ -4,7 +4,7 @@ import { CheckPolicies } from "src/auth/authorization/abilities/decorators/check
 import { PaginationArgs } from "src/common/args/pagination.args"
 import { GraphqlRequest } from "src/common/decorators/graphql/request.decorator"
 import { RequestsParserService } from "src/parsers/requests/requests-parser.service"
-import { Product } from "./product.entity"
+import { PaginatedProducts, Product } from "./product.entity"
 import { ProductsService } from "./products.service"
 import { CreateProductInput, UpdateProductInput } from "./dto/input/product.input"
 
@@ -15,13 +15,13 @@ export class ProductsResolver {
     private requestsParser: RequestsParserService
   ) {}
 
-  @Query(() => [Product], { name: "products" })
-  public async getManyPaginated(@Args() pagination: PaginationArgs) {
+  @Query(() => PaginatedProducts, { name: "products" })
+  public async getManyPaginated(@Args() pagination: PaginationArgs): Promise<PaginatedProducts> {
     const withoutFilter = {}
     return await this.productsService.findManyPaginated(withoutFilter, pagination)
   }
 
-  @Query(() => [Product], { name: "searchProducts" })
+  @Query(() => PaginatedProducts, { name: "searchProducts" })
   public async searchManyPaginated(
     @Args("searchQuery") search: string,
     @Args() pagination: PaginationArgs

@@ -1,9 +1,9 @@
-import { Field, InputType, ObjectType } from "@nestjs/graphql"
+import { Field, ObjectType } from "@nestjs/graphql"
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
-import { Max, Min } from "class-validator"
+import { MaxLength, MinLength } from "class-validator"
 import { Model, model, Document } from "mongoose"
 import { MongooseIdProp } from "src/common/decorators/mongoose/id-prop.decorator"
-import { Product } from "src/products/product.entity"
+import { PaginatedProducts } from "src/products/product.entity"
 
 export type CategoryDocument = Document & Category
 export type CategoryModel = Model<CategoryDocument>
@@ -15,14 +15,14 @@ export class Category {
   @MongooseIdProp()
   id!: string
 
-  @Min(2)
-  @Max(32)
+  @MinLength(2)
+  @MaxLength(32)
   @Field()
   @Prop({ required: true, unique: true })
   name!: string
 
-  @Field(() => [Product])
-  products!: Product[]
+  @Field(() => PaginatedProducts)
+  products!: PaginatedProducts[]
 }
 
 export const CategorySchema = SchemaFactory.createForClass(Category)

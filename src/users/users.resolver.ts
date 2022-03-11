@@ -1,8 +1,6 @@
-import { Req } from "@nestjs/common"
 import { Args, Mutation, Parent, Query, ResolveField, Resolver } from "@nestjs/graphql"
 import { Request } from "express"
 import { CheckPolicies } from "src/auth/authorization/abilities/decorators/check-policies.decorator"
-import { PaginationArgs } from "src/common/args/pagination.args"
 import { GraphqlRequest } from "src/common/decorators/graphql/request.decorator"
 import { Iso3166CountryCode } from "src/locations/interfaces/iso-3166.interface"
 import { LocationsService } from "src/locations/locations.service"
@@ -21,12 +19,6 @@ export class UsersResolver {
     private locationsService: LocationsService,
     private requestsParser: RequestsParserService
   ) {}
-
-  @Query(() => [User], { name: "users" })
-  public async getMany(@Args() pagination: PaginationArgs): Promise<User[]> {
-    const filterQuery = {}
-    return await this.usersService.findManyPaginated(filterQuery, pagination)
-  }
 
   @Query(() => User, { name: "user" })
   public async getById(@Args("userId") userId: string) {
