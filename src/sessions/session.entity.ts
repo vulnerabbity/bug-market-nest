@@ -1,6 +1,6 @@
 import { Field, ObjectType } from "@nestjs/graphql"
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
-import { Document, Model } from "mongoose"
+import { Document, Model, model } from "mongoose"
 import { MongooseIdProp } from "src/common/decorators/mongoose/id-prop.decorator"
 import { MongooseForeignKeyProp } from "src/common/decorators/mongoose/id-reference.prop"
 import { MongooseCreatedAtProp } from "src/common/decorators/mongoose/timestamps.decorator"
@@ -30,3 +30,4 @@ export class Session implements IEntityWithId {
 }
 
 export const SessionSchema = SchemaFactory.createForClass(Session)
+export const sessionModel = model(Session.name, SessionSchema) as unknown as SessionModel

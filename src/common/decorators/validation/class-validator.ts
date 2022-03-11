@@ -9,7 +9,7 @@ import { Length, Matches } from "class-validator"
  * u-ser.name_1b2
  */
 export function Username() {
-  return Matches(/^[a-z][a-z0-9[._-]*$/g)
+  return Matches(/[a-z][a-z0-9[._-]*/g)
 }
 
 export function UUID_V4() {

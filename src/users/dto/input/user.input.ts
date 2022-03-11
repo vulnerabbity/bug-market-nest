@@ -2,7 +2,7 @@ import { Field, InputType, OmitType } from "@nestjs/graphql"
 import { User } from "src/users/user.entity"
 
 @InputType()
-export class UserInput extends OmitType(User, ["id", "products", "avatarUrl"]) {
+export class UserInput extends OmitType(User, ["id", "products", "avatarUrl", "countryCode"]) {
   @Field()
   password!: string
 }
