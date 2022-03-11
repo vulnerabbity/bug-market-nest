@@ -14,9 +14,7 @@ export class TokensParserService {
     return result as AccessTokenPayload
   }
 
-  public parseRefreshTokenPayloadOrFail(
-    refreshTokenPayload: RefreshTokenPayload
-  ): RefreshTokenPayload {
+  public parseRefreshTokenPayloadOrFail(refreshTokenPayload: TokenPayload): RefreshTokenPayload {
     const result = this.parseTokenPayloadOrFail(refreshTokenPayload, "refresh")
 
     return result as RefreshTokenPayload
