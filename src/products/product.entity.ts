@@ -39,7 +39,7 @@ export class Product implements IEntityWithId {
   @MaxLength(1000)
   @Field({ nullable: true })
   @Prop()
-  description!: string
+  description?: string
 
   @Field(() => [String])
   @Prop()
