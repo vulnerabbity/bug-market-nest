@@ -13,6 +13,7 @@ import { JwtStrategy } from "./strategies/jwt.strategy"
     SessionsModule,
     JwtModule.register({
       privateKey: appConfig.security.tokens.keys.private,
+      publicKey: appConfig.security.tokens.keys.public,
       signOptions: { algorithm: "RS256" }
     })
   ],
