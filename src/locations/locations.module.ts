@@ -1,11 +1,9 @@
 import { Module } from "@nestjs/common"
-import { CitiesModule } from "./cities/cities.module"
-import { CountriesModule } from "./countries/countries.module"
-
-const submodules = [CountriesModule, CitiesModule]
+import { LocationsResolver } from "./locations.resolver"
+import { LocationsService } from "./locations.service"
 
 @Module({
-  imports: submodules,
-  exports: submodules
+  providers: [LocationsService, LocationsResolver],
+  exports: [LocationsService]
 })
 export class LocationsModule {}

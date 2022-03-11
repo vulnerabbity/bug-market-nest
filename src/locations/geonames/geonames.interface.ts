@@ -1,5 +1,32 @@
-import { appConfig } from "src/common/config"
-import { Iso3166CountryCode } from "../interfaces/iso-3166.interface"
+import { Field, InputType, registerEnumType } from "@nestjs/graphql"
+import { Max } from "class-validator"
+import { Iso3166CountriesCodesEnum, Iso3166CountryCode } from "../interfaces/iso-3166.interface"
+import { GeonamesEntity } from "./geonames.objects"
+
+registerEnumType(Iso3166CountriesCodesEnum, { name: "countryCodes" })
+
+@InputType()
+export class SearchManyQuery {
+  @Field({ nullable: true })
+  languageCode?: string
+  @Field(() => Iso3166CountriesCodesEnum, { nullable: true })
+  countryCode?: Iso3166CountryCode
+  @Field({ defaultValue: 0 })
+  offset!: number
+  @Max(1000)
+  @Field({ defaultValue: 100 })
+  limit!: number
+  @Field({ nullable: true, defaultValue: "population" })
+  sorting?: "population" | string
+}
+
+@InputType()
+export class SearchSingleQuery {
+  @Field()
+  id!: number
+  @Field({ nullable: true })
+  languageCode?: string
+}
 
 export type SearchStyle = "SHORT" | "MEDIUM" | "LONG" | "FULL"
 
@@ -10,44 +37,36 @@ export enum GeonamesFeatureCodesEnum {
 }
 export type FeatureCode = `${GeonamesFeatureCodesEnum}`
 
-export interface GeonameBaseSearchParams {
+export interface GeonamesBaseRequestParams {
   username: string
   lang?: string
 }
 
-export interface GeonameSearchManyParams extends GeonameBaseSearchParams {
+export interface GeonamesManyRequestParams extends GeonamesBaseRequestParams {
   type?: "json"
   startRow?: number
   maxRows?: number
   orderby?: string
   style?: SearchStyle
-  fcode?: FeatureCode
+  fcode?: string
   country?: Iso3166CountryCode
 }
 
-export interface GeonameSearchSingleParams extends GeonameBaseSearchParams {
+export interface GeonamesSingleRequestParams extends GeonamesBaseRequestParams {
   geonameId?: number
 }
 
-export interface GeonameShortEntity {
-  geonameId: number
-  countryCode: Iso3166CountryCode
-  name: string
-  toponymName: string
-  fcode: FeatureCode
-}
-
-export interface GeonameShortResponse {
+export interface GeonamesManyResponse {
   totalResultsCount: number
-  geonames: [GeonameShortEntity]
+  geonames: [GeonamesEntity]
 }
 
-export const baseSearchManyParams: GeonameSearchManyParams = {
-  type: "json",
-  username: appConfig.APIs.geonamesUsername,
-  style: "SHORT"
-}
-
-export const baseSearchSingleParams: GeonameSearchSingleParams = {
-  username: appConfig.APIs.geonamesUsername
+export interface GeonamesXMLResponse {
+  geoname: {
+    name: string[]
+    toponymName: string[]
+    geonameId: string[]
+    fcode: FeatureCode[]
+    countryCode: Iso3166CountryCode[]
+  }
 }
