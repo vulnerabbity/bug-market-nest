@@ -4,7 +4,7 @@ import { CheckPolicies } from "src/auth/authorization/abilities/decorators/check
 import { PaginationArgs } from "src/common/args/pagination.args"
 import { GraphqlRequest } from "src/common/decorators/graphql/request.decorator"
 import { RequestsParserService } from "src/parsers/requests/requests-parser.service"
-import { PaginatedProducts, Product } from "./product.entity"
+import { PaginatedProducts, Product, ProductSorting } from "./product.entity"
 import { ProductsService } from "./products.service"
 import { CreateProductInput, UpdateProductInput } from "./dto/input/product.input"
 
@@ -16,17 +16,15 @@ export class ProductsResolver {
   ) {}
 
   @Query(() => PaginatedProducts, { name: "products" })
-  public async getManyPaginated(@Args() pagination: PaginationArgs): Promise<PaginatedProducts> {
-    const withoutFilter = {}
-    return await this.productsService.findManyPaginated(withoutFilter, pagination)
-  }
-
-  @Query(() => PaginatedProducts, { name: "searchProducts" })
   public async searchManyPaginated(
-    @Args("searchQuery") search: string,
-    @Args() pagination: PaginationArgs
+    @Args({ nullable: true, name: "search" }) search?: string,
+    @Args({ nullable: true }) pagination?: PaginationArgs,
+    @Args({ nullable: true, name: "sorting" }) sorting?: ProductSorting
   ) {
-    return await this.productsService.fuzzySearchPaginated(search, pagination)
+    if (!search) {
+      return await this.productsService.findMany({ pagination, sorting })
+    }
+    return await this.productsService.fuzzySearchPaginated(search, { pagination, sorting })
   }
 
   @CheckPolicies(ability => ability.can("create", Product))
