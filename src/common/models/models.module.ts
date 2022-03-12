@@ -7,10 +7,12 @@ import { Session, SessionSchema } from "src/sessions/session.entity"
 import { User, UserSchema } from "src/users/user.entity"
 
 const models = [
-  MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-  MongooseModule.forFeature([{ name: Category.name, schema: CategorySchema }]),
-  MongooseModule.forFeature([{ name: PublicFile.name, schema: PublicFileSchema }]),
-  MongooseModule.forFeature([{ name: Session.name, schema: SessionSchema }]),
+  MongooseModule.forFeature([
+    { name: User.name, schema: UserSchema },
+    { name: Category.name, schema: CategorySchema },
+    { name: PublicFile.name, schema: PublicFileSchema },
+    { name: Session.name, schema: SessionSchema }
+  ]),
   MongooseModule.forFeatureAsync([{ name: Product.name, useFactory: ProductSchemaSetup }])
 ]
 

@@ -51,7 +51,8 @@ export class UsersResolver {
 
   @ResolveField("products", () => [Product])
   public async resolveProducts(@Parent() user: User): Promise<Product[]> {
-    return await this.productsService.findMany({ userId: user.id })
+    const { data: products } = await this.productsService.findMany({ filter: { userId: user.id } })
+    return products
   }
 
   private async setLocation(user: Partial<User>) {

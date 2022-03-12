@@ -17,7 +17,7 @@ export class CategoriesResolver {
 
   @Query(() => [Category], { name: "categories" })
   public async getMany(): Promise<Category[]> {
-    const categories = await this.categoriesService.findAll()
+    const { data: categories } = await this.categoriesService.findMany()
     return categories
   }
 
@@ -34,9 +34,9 @@ export class CategoriesResolver {
     @Parent() currentCategory: Category,
     @Args() pagination: PaginationArgs
   ): Promise<PaginatedProducts> {
-    return await this.productsService.findManyPaginated(
-      { categoryId: currentCategory.id },
+    return await this.productsService.findMany({
+      filter: { categoryId: currentCategory.id },
       pagination
-    )
+    })
   }
 }
