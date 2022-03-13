@@ -1,11 +1,10 @@
 import { Injectable } from "@nestjs/common"
 import { MongooseFuzzyModel } from "mongoose-fuzzy-search"
 import { CategoriesService } from "src/categories/categories.service"
-import { MongooseBasicSearchingQuery } from "src/common/interface/mongoose.interface"
+import { MongooseFilteredSearchingQuery } from "src/common/interface/mongoose.interface"
 import { IPaginatedEntities } from "src/common/interface/paginated-entity.interface"
 import { ModelsInjectorService } from "src/common/models/injector/models-injector.service"
 import { MongooseCaslService } from "src/common/service/mongoose-casl.service"
-import { PaginationSettings } from "src/common/service/mongoose.service"
 import { PublicFileDto } from "src/files/public/dto/public-file.dto"
 import { PublicFilesService } from "src/files/public/public-files.service"
 import { Product, ProductDocument, ProductFilterQuery, ProductModel } from "./product.entity"
@@ -26,18 +25,20 @@ export class ProductsService extends MongooseCaslService<Product> {
 
   public async fuzzySearchPaginated(
     search: string,
-    query: MongooseBasicSearchingQuery<Product> = {}
+    query: MongooseFilteredSearchingQuery<Product> = {}
   ): Promise<IPaginatedEntities<Product>> {
-    query.pagination = query.pagination ?? { offset: 0, limit: -1 }
-    const { pagination, sorting } = query
+    query.pagination ??= { offset: 0, limit: -1 }
+    query.filter ??= {}
+    const { pagination, sorting, filter } = query
 
     const products = await this.productModel
       .fuzzySearch(search)
+      .find(filter)
       .skip(pagination.offset)
       .limit(pagination.limit)
       .sort(sorting)
-    // Estimated count doesn't work correct with fuzzy search. Use countDocuments instead
-    const resultsNumber = await this.productModel.fuzzySearch(search).countDocuments()
+
+    const resultsNumber = await this.productModel.fuzzySearch(search).find(filter).countDocuments()
 
     return { data: products, totalResultsCount: resultsNumber }
   }

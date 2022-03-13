@@ -6,6 +6,7 @@ import { MongooseIdProp } from "src/common/decorators/mongoose/id-prop.decorator
 import { MongooseForeignKeyProp } from "src/common/decorators/mongoose/id-reference.prop"
 import { UUID_V4 } from "src/common/decorators/validation/class-validator"
 import { IEntityWithId } from "src/common/interface/entities.interface"
+import { Range } from "src/common/interface/graphql.interface"
 import {
   MongooseSortingOrder,
   MongooseSortingOrdersEnum
@@ -76,6 +77,12 @@ export class ProductSorting {
 
   @Field(() => MongooseSortingOrdersEnum, { nullable: true })
   createdAt?: MongooseSortingOrder
+}
+
+@InputType()
+export class ProductFilters {
+  @Field(() => Range, { nullable: true })
+  priceRange?: Range
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product)

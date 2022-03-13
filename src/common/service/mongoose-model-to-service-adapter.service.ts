@@ -2,7 +2,6 @@ import { BadRequestException, NotFoundException } from "@nestjs/common"
 import { Model, Document, FilterQuery } from "mongoose"
 import { MongooseFilteredSearchingQuery } from "../interface/mongoose.interface"
 import { IPaginatedEntities } from "../interface/paginated-entity.interface"
-import { PaginationSettings } from "./mongoose.service"
 
 /**
  * Allows to extend mongoose model methods by remapping it into class and then use inheritance.
@@ -51,7 +50,7 @@ export abstract class MongooseModelToServiceAdapter<T> {
       .skip(pagination.offset)
       .limit(pagination.limit)
       .sort(sorting)
-    const resultsNumber = await this.documentModel.estimatedDocumentCount(filter)
+    const resultsNumber = await this.documentModel.countDocuments(filter)
     return { data: documents, totalResultsCount: resultsNumber }
   }
 

@@ -5,7 +5,7 @@ import { Category } from "../category.entity"
 export class CategoryInput extends OmitType(Category, ["id"]) {}
 
 @InputType()
-export class CreateCategoryInput extends OmitType(CategoryInput, ["products"]) {}
+export class CreateCategoryInput extends OmitType(CategoryInput, []) {}
 
 @InputType()
 export class UpdateCategoryInput extends PartialType(CreateCategoryInput) {}
