@@ -28,15 +28,4 @@ export class CategoriesResolver {
   ): Promise<Category> {
     return await this.categoriesService.createOrFail(createCategoryData)
   }
-
-  @ResolveField("products", () => [Product])
-  public async resolveProducts(
-    @Parent() currentCategory: Category,
-    @Args() pagination: PaginationArgs
-  ): Promise<PaginatedProducts> {
-    return await this.productsService.findMany({
-      filter: { categoryId: currentCategory.id },
-      pagination
-    })
-  }
 }

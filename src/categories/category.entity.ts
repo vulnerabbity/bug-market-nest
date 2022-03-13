@@ -20,9 +20,6 @@ export class Category {
   @Field()
   @Prop({ required: true, unique: true })
   name!: string
-
-  @Field(() => PaginatedProducts)
-  products!: PaginatedProducts[]
 }
 
 export const CategorySchema = SchemaFactory.createForClass(Category)
