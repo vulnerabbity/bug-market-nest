@@ -4,9 +4,16 @@ import { CheckPolicies } from "src/auth/authorization/abilities/decorators/check
 import { PaginationArgs } from "src/common/args/pagination.args"
 import { GraphqlRequest } from "src/common/decorators/graphql/request.decorator"
 import { RequestsParserService } from "src/parsers/requests/requests-parser.service"
-import { PaginatedProducts, Product, ProductSorting } from "./product.entity"
+import {
+  PaginatedProducts,
+  Product,
+  ProductFilters,
+  ProductSorting,
+  ProductFilterQuery
+} from "./product.entity"
 import { ProductsService } from "./products.service"
 import { CreateProductInput, UpdateProductInput } from "./dto/input/product.input"
+import { MongooseFilteredSearchingQuery } from "src/common/interface/mongoose.interface"
 
 @Resolver(() => Product)
 export class ProductsResolver {
@@ -17,14 +24,31 @@ export class ProductsResolver {
 
   @Query(() => PaginatedProducts, { name: "products" })
   public async searchManyPaginated(
+    @Args({ nullable: true, name: "filtering" }) filtering?: ProductFilters,
     @Args({ nullable: true, name: "search" }) search?: string,
     @Args({ nullable: true }) pagination?: PaginationArgs,
     @Args({ nullable: true, name: "sorting" }) sorting?: ProductSorting
   ) {
-    if (!search) {
-      return await this.productsService.findMany({ pagination, sorting })
+    // TODO: refactoring
+    let filter: ProductFilterQuery = {}
+    if (filtering) {
+      const { priceRange } = filtering
+      filter = {
+        price: { $gte: priceRange?.min, $lte: priceRange?.max }
+      }
     }
-    return await this.productsService.fuzzySearchPaginated(search, { pagination, sorting })
+
+    const searchQuery: MongooseFilteredSearchingQuery<Product> = {
+      pagination,
+      sorting,
+      filter
+    }
+
+    if (search) {
+      return await this.productsService.fuzzySearchPaginated(search, searchQuery)
+    }
+
+    return await this.productsService.findMany(searchQuery)
   }
 
   @CheckPolicies(ability => ability.can("create", Product))
