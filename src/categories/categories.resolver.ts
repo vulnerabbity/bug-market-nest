@@ -1,19 +1,12 @@
-import { Inject } from "@nestjs/common"
-import { Args, Mutation, Parent, Query, ResolveField, Resolver } from "@nestjs/graphql"
+import { Args, Mutation, Query, Resolver } from "@nestjs/graphql"
 import { CheckPolicies } from "src/auth/authorization/abilities/decorators/check-policies.decorator"
-import { PaginationArgs } from "src/common/args/pagination.args"
-import { PaginatedProducts, Product } from "src/products/product.entity"
-import { ProductsService } from "src/products/products.service"
 import { CategoriesService } from "./categories.service"
 import { Category } from "./category.entity"
 import { CreateCategoryInput } from "./dto/category.input"
 
 @Resolver(() => Category)
 export class CategoriesResolver {
-  constructor(
-    private categoriesService: CategoriesService,
-    private productsService: ProductsService
-  ) {}
+  constructor(private categoriesService: CategoriesService) {}
 
   @Query(() => [Category], { name: "categories" })
   public async getMany(): Promise<Category[]> {
