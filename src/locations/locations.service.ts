@@ -11,6 +11,7 @@ import {
   Country,
   LocationEntity,
   PaginatedCities,
+  PaginatedCountries,
   PaginatedLocationEntities
 } from "./locations.objects"
 
@@ -45,7 +46,7 @@ export class LocationsService extends GeonamesService {
     return this.convertGeonamesPaginatedEntitiesToLocationEntities(paginatedGeonamesEntities)
   }
 
-  async findManyCountries(query: SearchManyQuery): Promise<PaginatedCities> {
+  async findManyCountries(query: SearchManyQuery): Promise<PaginatedCountries> {
     const paginatedGeonamesEntities = await this.fetchManyOrFail(
       query,
       GeonamesFeatureCodesEnum.COUNTRY
