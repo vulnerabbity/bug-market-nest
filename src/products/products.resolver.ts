@@ -1,7 +1,7 @@
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql"
 import { Request } from "express"
 import { CheckPolicies } from "src/auth/authorization/abilities/decorators/check-policies.decorator"
-import { PaginationArgs } from "src/common/args/pagination.args"
+import { Pagination } from "src/common/objects/pagination.input"
 import { GraphqlRequest } from "src/common/decorators/graphql/request.decorator"
 import { RequestsParserService } from "src/parsers/requests/requests-parser.service"
 import {
@@ -26,7 +26,7 @@ export class ProductsResolver {
   public async searchManyPaginated(
     @Args({ nullable: true, name: "filtering" }) filtering?: ProductFilters,
     @Args({ nullable: true, name: "search" }) search?: string,
-    @Args({ nullable: true }) pagination?: PaginationArgs,
+    @Args({ nullable: true, name: "pagination" }) pagination?: Pagination,
     @Args({ nullable: true, name: "sorting" }) sorting?: ProductSorting
   ) {
     // TODO: refactoring

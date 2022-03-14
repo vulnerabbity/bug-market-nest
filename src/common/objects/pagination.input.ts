@@ -1,8 +1,8 @@
-import { ArgsType, Field } from "@nestjs/graphql"
+import { Field, InputType } from "@nestjs/graphql"
 import { IsInt, Max, Min } from "class-validator"
 
-@ArgsType()
-export class PaginationArgs {
+@InputType()
+export class Pagination {
   @Field()
   @Min(0)
   offset: number = 0
