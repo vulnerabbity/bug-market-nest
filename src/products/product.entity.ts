@@ -2,6 +2,7 @@ import { Field, InputType, ObjectType } from "@nestjs/graphql"
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
 import { MaxLength, Min, MinLength } from "class-validator"
 import { Document, Model, model, FilterQuery } from "mongoose"
+import { MongooseFuzzyModel } from "mongoose-fuzzy-search"
 import { MongooseIdProp } from "src/common/decorators/mongoose/id-prop.decorator"
 import { MongooseForeignKeyProp } from "src/common/decorators/mongoose/id-reference.prop"
 import { UUID_V4 } from "src/common/decorators/validation/class-validator"
@@ -12,11 +13,11 @@ import {
   MongooseSortingOrdersEnum
 } from "src/common/interface/mongoose.interface"
 import { IPaginatedEntities } from "src/common/interface/paginated-entity.interface"
-import { ProductFuzzyModel } from "./products.service"
 
 export type ProductDocument = Document & Product
-export type ProductModel = Model<ProductDocument>
 export type ProductFilterQuery = FilterQuery<ProductDocument>
+export type ProductModel = Model<ProductDocument>
+export type ProductFuzzyModel = ProductModel & MongooseFuzzyModel<ProductDocument>
 
 @ObjectType()
 @InputType("ProductInput")
