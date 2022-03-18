@@ -51,7 +51,9 @@ export class UsersResolver {
 
   @ResolveField("products", () => [Product])
   public async resolveProducts(@Parent() user: User): Promise<Product[]> {
-    const { data: products } = await this.productsService.findMany({ filter: { userId: user.id } })
+    const { data: products } = await this.productsService.findManyPaginated({
+      filter: { userId: user.id }
+    })
     return products
   }
 
