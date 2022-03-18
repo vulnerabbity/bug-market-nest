@@ -39,18 +39,15 @@ export abstract class MongooseModelToServiceAdapter<T> {
     return document
   }
 
-  public async findMany(
+  public async findMany(searchingQuery: MongooseFilteredSearchingQuery<T> = {}): Promise<T[]> {
+    return await this.makeFindManyQuery(searchingQuery).exec()
+  }
+
+  public async findManyPaginated(
     query: MongooseFilteredSearchingQuery<T> = {}
   ): Promise<IPaginatedEntities<T>> {
-    query.filter = query.filter ?? {}
-    query.pagination = query.pagination ?? { limit: -1, offset: 0 }
-    const { filter, pagination, sorting } = query
-    const documents = await this.documentModel
-      .find(filter)
-      .skip(pagination.offset)
-      .limit(pagination.limit)
-      .sort(sorting)
-    const resultsNumber = await this.documentModel.countDocuments(filter)
+    const documents = await this.findMany(query)
+    const resultsNumber = await this.documentModel.countDocuments(query.filter ?? {})
     return { data: documents, totalResultsCount: resultsNumber }
   }
 
@@ -91,5 +88,17 @@ export abstract class MongooseModelToServiceAdapter<T> {
     if (deletedCount === 0) {
       throw new BadRequestException("Nothing was deleted")
     }
+  }
+
+  protected makeFindManyQuery(searchingQuery: MongooseFilteredSearchingQuery<T> = {}) {
+    searchingQuery.filter = searchingQuery.filter ?? {}
+    searchingQuery.pagination = searchingQuery.pagination ?? { limit: 50, offset: 0 }
+    const { filter, pagination, sorting } = searchingQuery
+    const query = this.documentModel
+      .find(filter)
+      .skip(pagination.offset)
+      .limit(pagination.limit)
+      .sort(sorting)
+    return query
   }
 }
