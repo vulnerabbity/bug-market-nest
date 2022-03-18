@@ -5,15 +5,14 @@ import { MongooseFilteredSearchingQuery } from "src/common/interface/mongoose.in
 import { IPaginatedEntities } from "src/common/interface/paginated-entity.interface"
 import { ModelsInjectorService } from "src/common/models/injector/models-injector.service"
 import { MongooseCaslService } from "src/common/service/mongoose-casl.service"
+import { ManyDocumentsQuery } from "src/common/service/mongoose-model-to-service-adapter.service"
 import { PublicFileDto } from "src/files/public/dto/public-file.dto"
 import { PublicFilesService } from "src/files/public/public-files.service"
-import { Product, ProductDocument, ProductFilterQuery, ProductModel } from "./product.entity"
-
-export type ProductFuzzyModel = ProductModel & MongooseFuzzyModel<ProductDocument>
+import { Product, ProductFilterQuery } from "./product.entity"
 
 @Injectable()
 export class ProductsService extends MongooseCaslService<Product> {
-  private productModel = this.modelsInjector.productModel
+  documentModel = this.modelsInjector.productModel
   private categoriesService = new CategoriesService(this.modelsInjector)
 
   constructor(
@@ -23,24 +22,24 @@ export class ProductsService extends MongooseCaslService<Product> {
     super(modelsInjector.productModel)
   }
 
-  public async fuzzySearchPaginated(
-    search: string,
-    query: MongooseFilteredSearchingQuery<Product> = {}
+  public async findMany(query: MongooseFilteredSearchingQuery<Product> = {}, search: string = "") {
+    if (search === "") {
+      return await super.findMany(query)
+    }
+    // adds fuzzy search middleware to default query
+    return await this.documentModel.fuzzySearch(search).where(super.getFindManyQuery(query))
+  }
+
+  public async findManyPaginated(
+    query: MongooseFilteredSearchingQuery<Product> = {},
+    search = ""
   ): Promise<IPaginatedEntities<Product>> {
-    query.pagination ??= { offset: 0, limit: -1 }
-    query.filter ??= {}
-    const { pagination, sorting, filter } = query
-
-    const products = await this.productModel
-      .fuzzySearch(search)
-      .find(filter)
-      .skip(pagination.offset)
-      .limit(pagination.limit)
-      .sort(sorting)
-
-    const resultsNumber = await this.productModel.fuzzySearch(search).find(filter).countDocuments()
-
-    return { data: products, totalResultsCount: resultsNumber }
+    if (search === "") {
+      return await super.findManyPaginated(query)
+    }
+    const products = await this.findMany(query, search)
+    const totalResultsCount = await this.documentModel.fuzzySearch(search).count()
+    return { data: products, totalResultsCount }
   }
 
   public async uploadImageFileAndAddUrlToProduct(dto: PublicFileDto, product: Product) {
