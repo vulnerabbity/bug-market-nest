@@ -10,7 +10,7 @@ export class CategoriesResolver {
 
   @Query(() => [Category], { name: "categories" })
   public async getMany(): Promise<Category[]> {
-    const { data: categories } = await this.categoriesService.findMany()
+    const { data: categories } = await this.categoriesService.findManyPaginated()
     return categories
   }
 
