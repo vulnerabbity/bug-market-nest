@@ -1,11 +1,9 @@
 import { Injectable } from "@nestjs/common"
-import { MongooseFuzzyModel } from "mongoose-fuzzy-search"
 import { CategoriesService } from "src/categories/categories.service"
 import { MongooseFilteredSearchingQuery } from "src/common/interface/mongoose.interface"
 import { IPaginatedEntities } from "src/common/interface/paginated-entity.interface"
 import { ModelsInjectorService } from "src/common/models/injector/models-injector.service"
 import { MongooseCaslService } from "src/common/service/mongoose-casl.service"
-import { ManyDocumentsQuery } from "src/common/service/mongoose-model-to-service-adapter.service"
 import { PublicFileDto } from "src/files/public/dto/public-file.dto"
 import { PublicFilesService } from "src/files/public/public-files.service"
 import { Product, ProductFilterQuery } from "./product.entity"
@@ -27,7 +25,7 @@ export class ProductsService extends MongooseCaslService<Product> {
       return await super.findMany(query)
     }
     // adds fuzzy search middleware to default query
-    return await this.documentModel.fuzzySearch(search).where(super.getFindManyQuery(query))
+    return await this.documentModel.fuzzySearch(search).where(super.makeFindManyQuery(query))
   }
 
   public async findManyPaginated(
