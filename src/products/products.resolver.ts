@@ -25,7 +25,7 @@ export class ProductsResolver {
   @Query(() => PaginatedProducts, { name: "products" })
   public async searchManyPaginated(
     @Args({ nullable: true, name: "filtering" }) filtering?: ProductFilters,
-    @Args({ nullable: true, name: "search" }) search?: string,
+    @Args({ nullable: true, name: "fuzzySearch" }) fuzzySearch?: string,
     @Args({ nullable: true, name: "pagination" }) pagination?: Pagination,
     @Args({ nullable: true, name: "sorting" }) sorting?: ProductSorting
   ) {
@@ -44,11 +44,7 @@ export class ProductsResolver {
       filter
     }
 
-    if (search) {
-      return await this.productsService.fuzzySearchPaginated(search, searchQuery)
-    }
-
-    return await this.productsService.findMany(searchQuery)
+    return await this.productsService.findManyPaginated(searchQuery, fuzzySearch)
   }
 
   @CheckPolicies(ability => ability.can("create", Product))
