@@ -22,6 +22,11 @@ export class ProductsResolver {
     private requestsParser: RequestsParserService
   ) {}
 
+  @Query(() => Product, { name: "product" })
+  public async getSingleProduct(@Args("id") id: string) {
+    return await this.productsService.findByIdOrFail(id)
+  }
+
   @Query(() => PaginatedProducts, { name: "products" })
   public async searchManyPaginated(
     @Args({ nullable: true, name: "filtering" }) filtering?: ProductFilters,
