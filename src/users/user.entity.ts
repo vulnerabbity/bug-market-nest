@@ -6,7 +6,7 @@ import { Product } from "src/products/product.entity"
 import { UserRole, UserRolesEnum } from "./user.interface"
 import { IEntityWithId } from "src/common/interface/entities.interface"
 import { MongooseIdProp } from "src/common/decorators/mongoose/id-prop.decorator"
-import { MaxLength, MinLength } from "class-validator"
+import { MaxLength, MinLength, IsOptional } from "class-validator"
 import { Username } from "src/common/decorators/validation/class-validator"
 import {
   Iso3166CountriesCodesEnum,
@@ -28,11 +28,12 @@ export class User implements IEntityWithId {
   id!: string
 
   @Username()
-  @MaxLength(32)
+  @MaxLength(24)
   @Prop({ unique: true, immutable: true, required: true })
   username!: string
 
-  @MaxLength(32)
+  @IsOptional()
+  @MaxLength(24)
   @Field({ nullable: true })
   @Prop()
   name?: string
@@ -46,6 +47,7 @@ export class User implements IEntityWithId {
   @Prop()
   avatarUrl?: string
 
+  @IsOptional()
   @MaxLength(500)
   @Field({ nullable: true })
   @Prop()
