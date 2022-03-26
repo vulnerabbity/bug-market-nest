@@ -38,7 +38,7 @@ export class Product implements IEntityWithId {
   userId!: string
 
   @Field()
-  @Prop({ required: true })
+  @Prop({ required: true, index: true })
   categoryName!: string
 
   @MaxLength(1000)
