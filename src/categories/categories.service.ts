@@ -1,12 +1,16 @@
 import { Injectable } from "@nestjs/common"
-import { ModelsInjectorService } from "src/common/models/injector/models-injector.service"
-
-import { MongooseService } from "src/common/service/mongoose.service"
-import { Category } from "./category.entity"
+import { CategoriesList, Category } from "./categories.list"
 
 @Injectable()
-export class CategoriesService extends MongooseService<Category> {
-  constructor(private modelsInjector: ModelsInjectorService) {
-    super(modelsInjector.categoryModel)
+export class CategoriesService {
+  private readonly categories = CategoriesList
+
+  getCategories(): Category[] {
+    const categories = this.categories as unknown as Category[]
+    return categories
+  }
+
+  isCategoryExists(name: string): boolean {
+    return this.categories.includes(name as any)
   }
 }

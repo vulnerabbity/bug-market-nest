@@ -37,10 +37,9 @@ export class Product implements IEntityWithId {
   @MongooseForeignKeyProp()
   userId!: string
 
-  @UUID_V4()
   @Field()
-  @MongooseForeignKeyProp()
-  categoryId!: string
+  @Prop({ required: true })
+  categoryName!: string
 
   @MaxLength(1000)
   @Field({ nullable: true })
