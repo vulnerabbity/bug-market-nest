@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common"
-import { CategoriesService } from "src/categories/categories.service"
 import { MongooseFilteredSearchingQuery } from "src/common/interface/mongoose.interface"
 import { IPaginatedEntities } from "src/common/interface/paginated-entity.interface"
 import { ModelsInjectorService } from "src/common/models/injector/models-injector.service"
@@ -11,7 +10,6 @@ import { Product, ProductFilterQuery } from "./product.entity"
 @Injectable()
 export class ProductsService extends MongooseCaslService<Product> {
   documentModel = this.modelsInjector.productModel
-  private categoriesService = new CategoriesService(this.modelsInjector)
 
   constructor(
     private publicFilesService: PublicFilesService,
@@ -65,10 +63,6 @@ export class ProductsService extends MongooseCaslService<Product> {
   public generateImageUrl({ product, imageIndex }: { product: Product; imageIndex: number }) {
     const productId = product.id
     return `${productId}_${imageIndex}`
-  }
-
-  public async failIfCategoryIdNotExists(categoryId: string) {
-    await this.categoriesService.failIfIdNotExists(categoryId)
   }
 
   private async addImageUrl(newUrl: string, product: Product): Promise<Product> {

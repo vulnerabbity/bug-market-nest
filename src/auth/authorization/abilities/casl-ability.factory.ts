@@ -6,17 +6,16 @@ import {
   ExtractSubjectType
 } from "@casl/ability"
 import { Injectable } from "@nestjs/common"
-import { Category } from "src/categories/category.entity"
 import { ModelsInjectorService } from "src/common/models/injector/models-injector.service"
 import { Product, ProductModel } from "src/products/product.entity"
 import { User, UserModel } from "src/users/user.entity"
 import { UserRole } from "src/users/user.interface"
 import { RolesOwner } from "./abilities.interface"
 
-type SubjectsEntities = typeof User | typeof Product | typeof Category
+type SubjectsEntities = typeof User | typeof Product
 type SubjectsModels = UserModel | ProductModel
 
-export type Subjects = InferSubjects<SubjectsEntities | SubjectsModels | typeof Category> | "all"
+export type Subjects = InferSubjects<SubjectsEntities | SubjectsModels> | "all"
 
 export type Action = "manage" | "create" | "read" | "update" | "delete"
 

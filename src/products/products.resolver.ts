@@ -14,9 +14,13 @@ import {
 import { ProductsService } from "./products.service"
 import { CreateProductInput, UpdateProductInput } from "./dto/input/product.input"
 import { MongooseFilteredSearchingQuery } from "src/common/interface/mongoose.interface"
+import { CategoriesService } from "src/categories/categories.service"
+import { BadRequestException } from "@nestjs/common"
 
 @Resolver(() => Product)
 export class ProductsResolver {
+  private categoriesService = new CategoriesService()
+
   constructor(
     private productsService: ProductsService,
     private requestsParser: RequestsParserService
@@ -59,7 +63,7 @@ export class ProductsResolver {
     @GraphqlRequest() req: Request
   ) {
     const userId = this.requestsParser.parseUserIdOrFail(req)
-    await this.productsService.failIfCategoryIdNotExists(createProductData.categoryId)
+    this.failIfCategoryNotExists(createProductData.categoryName)
 
     createProductData.userId = userId
     return await this.productsService.createOrFail(createProductData)
@@ -76,10 +80,10 @@ export class ProductsResolver {
     const product = await this.productsService.findByIdOrFail(productId)
     this.productsService.failIfUpdatingForbidden({ requester, subject: product })
 
-    const categoryId = updateProductData.categoryId
-    const needUpdateCategory = categoryId !== undefined
+    const categoryName = updateProductData.categoryName
+    const needUpdateCategory = categoryName !== undefined
     if (needUpdateCategory) {
-      await this.productsService.failIfCategoryIdNotExists(categoryId)
+      this.failIfCategoryNotExists(categoryName)
     }
 
     const updatedProduct = await this.productsService.updateByIdOrFail(productId, updateProductData)
@@ -98,5 +102,13 @@ export class ProductsResolver {
 
     await this.productsService.deleteProductAndAllImagesById(productId)
     return product
+  }
+
+  private failIfCategoryNotExists(categoryName: string): void {
+    const isCategoryExist = this.categoriesService.isCategoryExists(categoryName)
+    if (isCategoryExist) {
+      return
+    }
+    throw new BadRequestException("Category does not exists")
   }
 }
