@@ -59,10 +59,10 @@ export class ProductsController {
   }
 
   @CheckPolicies()
-  @Delete("images/:productId/:imageUrl")
+  @Delete("images/:productId/:imageIndex")
   public async deleteImageHandler(
     @Param("productId") productId: string,
-    @Param("imageUrl") imageUrlToDelete: string,
+    @Param("imageIndex", parseImageIndexPipe) imageIndex: number,
     @Req() request: Request
   ): Promise<PublicFileResponse> {
     const requester = this.requestsParser.parseRolesOwnerOrFail(request)
@@ -70,14 +70,16 @@ export class ProductsController {
 
     this.productsService.failIfDeletingForbidden({ requester, subject: product })
 
-    const productHasRequestedUrl = product.imagesUrls.includes(imageUrlToDelete)
+    const productImageUrl = this.productsService.generateImageUrl({ product, imageIndex })
+
+    const productHasRequestedUrl = product.imagesUrls.includes(productImageUrl)
 
     if (productHasRequestedUrl === false) {
-      const message = `Product dont have image url '${imageUrlToDelete}'`
+      const message = `Product dont have image url '${productImageUrl}'`
       throw new BadRequestException(message)
     }
 
-    await this.productsService.deleteImageFileAndUrlFromProduct(imageUrlToDelete, product)
-    return { success: true, message: "Product image deleted", fileUrl: imageUrlToDelete }
+    await this.productsService.deleteImageFileAndUrlFromProduct(productImageUrl, product)
+    return { success: true, message: "Product image deleted", fileUrl: productImageUrl }
   }
 }
