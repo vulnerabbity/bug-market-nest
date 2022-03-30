@@ -1,11 +1,10 @@
 import { Field, InputType, ObjectType } from "@nestjs/graphql"
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
-import { MaxLength, Min, MinLength } from "class-validator"
+import { IsOptional, MaxLength, Min, MinLength } from "class-validator"
 import { Document, Model, model, FilterQuery } from "mongoose"
 import { MongooseFuzzyModel } from "mongoose-fuzzy-search"
 import { MongooseIdProp } from "src/common/decorators/mongoose/id-prop.decorator"
 import { MongooseForeignKeyProp } from "src/common/decorators/mongoose/id-reference.prop"
-import { UUID_V4 } from "src/common/decorators/validation/class-validator"
 import { IEntityWithId } from "src/common/interface/entities.interface"
 import { Range } from "src/common/interface/graphql.interface"
 import {
@@ -41,6 +40,7 @@ export class Product implements IEntityWithId {
   @Prop({ required: true, index: true })
   categoryName!: string
 
+  @IsOptional()
   @MaxLength(1000)
   @Field({ nullable: true })
   @Prop()
