@@ -7,7 +7,7 @@ async function bootstrap() {
 
   // register for "class-validator" library validating
   app.useGlobalPipes(new ValidationPipe())
-
+  app.enableCors()
   await app.listen(3000)
 }
 bootstrap()
