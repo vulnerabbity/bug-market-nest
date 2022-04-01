@@ -32,7 +32,7 @@ export class ProductsController {
 
   @CheckPolicies()
   @Post("images/:productId/:imageIndex")
-  @ImageUploadEndpoint("image", { limits: { fileSize: 5 * MEGABYTE_IN_BYTES } })
+  @ImageUploadEndpoint("image", { limits: { fileSize: 10 * MEGABYTE_IN_BYTES } })
   public async uploadImageHandler(
     @UploadedFile(new DefinedPipe("image")) uploadedProductImage: MulterFile,
     @Param("productId") productId: string,
