@@ -38,14 +38,14 @@ export class ProductsService extends MongooseCaslService<Product> {
     return { data: products, totalResultsCount }
   }
 
-  public async uploadImageFileAndAddUrlToProduct(dto: PublicFileDto, product: Product) {
-    await this.addImageUrl(dto.url, product)
+  public async uploadImageFileAndAddIdToProduct(dto: PublicFileDto, product: Product) {
+    await this.addImageId(dto.id, product)
     await this.publicFilesService.upload(dto)
   }
 
-  public async deleteImageFileAndUrlFromProduct(urlToDelete: string, product: Product) {
-    await this.deleteImageUrl(urlToDelete, product)
-    await this.publicFilesService.deleteByUrl(urlToDelete)
+  public async deleteImage(imageId: string, product: Product) {
+    await this.deleteImageId(imageId, product)
+    await this.publicFilesService.deleteByIdOrFail(imageId)
   }
 
   public async deleteProductAndAllImagesById(id: string): Promise<void> {
@@ -53,40 +53,34 @@ export class ProductsService extends MongooseCaslService<Product> {
   }
 
   public async deleteProductAndAllImages(filter: ProductFilterQuery): Promise<void> {
-    const { imagesUrls } = await this.findOneOrFail(filter)
+    const { imagesIds } = await this.findOneOrFail(filter)
     await this.deleteOneOrFail(filter)
-    imagesUrls.forEach(async url => {
-      await this.publicFilesService.deleteByUrl(url)
+    imagesIds.forEach(async imageId => {
+      await this.publicFilesService.deleteByIdOrFail(imageId)
     })
   }
 
-  public generateImageUrl({ product, imageIndex }: { product: Product; imageIndex: number }) {
-    const productId = product.id
-    return `${productId}_${imageIndex}`
-  }
-
-  private async addImageUrl(newUrl: string, product: Product): Promise<Product> {
-    const alreadyHasNewUrl = product.imagesUrls.includes(newUrl)
+  private async addImageId(newId: string, product: Product): Promise<Product> {
+    const alreadyHasNewUrl = product.imagesIds.includes(newId)
     if (alreadyHasNewUrl) {
       return product
     }
 
-    const newUrls = [...product.imagesUrls, newUrl]
-    return await this.updateImagesUrls(newUrls, product)
+    const newUrls = [...product.imagesIds, newId]
+    return await this.updateImagesIds(newUrls, product)
   }
 
-  private async deleteImageUrl(urlToDelete: string, product: Product): Promise<Product> {
-    const needDeleteImage = product.imagesUrls.includes(urlToDelete)
+  private async deleteImageId(imageIdToDelete: string, product: Product): Promise<Product> {
+    const needDeleteImage = product.imagesIds.includes(imageIdToDelete)
     if (needDeleteImage === false) {
       return product
     }
 
-    const newUrls = product.imagesUrls.filter(url => url !== urlToDelete)
-    return await this.updateImagesUrls(newUrls, product)
+    const newIds = product.imagesIds.filter(imageId => imageId !== imageIdToDelete)
+    return await this.updateImagesIds(newIds, product)
   }
 
-  private async updateImagesUrls(newUrls: string[], { id: productId }: Product): Promise<Product> {
-    const sortedNewUrls = [...newUrls].sort()
-    return await this.updateByIdOrFail(productId, { imagesUrls: sortedNewUrls })
+  private async updateImagesIds(newIds: string[], { id: productId }: Product): Promise<Product> {
+    return await this.updateByIdOrFail(productId, { imagesIds: newIds })
   }
 }
