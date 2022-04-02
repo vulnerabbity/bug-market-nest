@@ -27,7 +27,6 @@ export class UsersController {
 
     this.usersService.failIfUpdatingForbidden({ subject: userToUpdate, requester })
     const newId = `${userToUpdate.id}_avatar`
-    console.log("post avatar")
 
     const avatarDto: UploadAvatarDto = {
       data: uploadedAvatar.buffer,
