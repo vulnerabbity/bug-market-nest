@@ -7,30 +7,33 @@ export abstract class BaseFileService<T extends BaseFile> extends MongooseServic
     super(fileModel)
   }
 
-  public async upload(dto: Partial<T>): Promise<void> {
-    const isFileExists = await this.isExists({ url: dto.url })
+  public async upload(
+    dto: Omit<T, "createdAt" | "updatedAt" | "url">
+  ): Promise<{ newId: string; oldId: string | null }> {
+    const oldId = dto.id
+    const isFileExists = await this.isExists({ id: oldId })
 
     if (!isFileExists) {
-      await this.createOrFail(dto)
-      return
+      const { id: newId } = await this.createOrFail(dto as Partial<T>)
+      return { newId, oldId: null }
     }
 
     const update: Partial<T> = {
       data: dto.data,
       mimetype: dto.mimetype
     } as Partial<T>
-    await this.updateOrFail({ url: dto.url }, update)
-  }
-
-  public async findByUrl(url: string) {
-    return await this.findOneOrFail({ url })
+    const { id: newId } = await this.updateOrFail({ id: dto.id }, update)
+    return { newId, oldId }
   }
 
   public async getUserId(filter: FilterQuery<T>) {
     return await this.findOneOrFail(filter, { userId: true })
   }
 
-  public async deleteByUrl(url: string) {
-    await this.deleteOneOrFail({ url })
+  public async getUpdatedAt(id: string): Promise<Date> {
+    const { updatedAt } = await this.findByIdOrFail(id, {
+      updatedAt: true
+    })
+    return updatedAt
   }
 }
