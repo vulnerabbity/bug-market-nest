@@ -22,6 +22,9 @@ export const appConfig = {
   },
   APIs: {
     geonamesUsername: process.env.GEONAMES_USERNAME!
+  },
+  core: {
+    host: process.env.HOST ?? "http://localhost:3000"
   }
 }
 
