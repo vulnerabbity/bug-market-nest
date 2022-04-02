@@ -2,6 +2,7 @@ import { Args, Mutation, Parent, Query, ResolveField, Resolver } from "@nestjs/g
 import { Request } from "express"
 import { CheckPolicies } from "src/auth/authorization/abilities/decorators/check-policies.decorator"
 import { GraphqlRequest } from "src/common/decorators/graphql/request.decorator"
+import { PublicFilesService } from "src/files/public/public-files.service"
 import { Iso3166CountryCode } from "src/locations/interfaces/iso-3166.interface"
 import { LocationsService } from "src/locations/locations.service"
 import { RequestsParserService } from "src/parsers/requests/requests-parser.service"
@@ -17,7 +18,8 @@ export class UsersResolver {
     private usersService: UsersService,
     private productsService: ProductsService,
     private locationsService: LocationsService,
-    private requestsParser: RequestsParserService
+    private requestsParser: RequestsParserService,
+    private filesService: PublicFilesService
   ) {}
 
   @Query(() => User, { name: "user" })
@@ -55,6 +57,15 @@ export class UsersResolver {
       filter: { userId: user.id }
     })
     return products
+  }
+
+  @ResolveField(() => String, { name: "avatarUrl", nullable: true })
+  public async resolveAvatarUrl(@Parent() { avatarId }: User): Promise<string | undefined> {
+    const userHasAvatar = !!avatarId
+    if (userHasAvatar) {
+      return await this.filesService.createUrlForFileId(avatarId)
+    }
+    return undefined
   }
 
   private async setLocation(user: Partial<User>) {

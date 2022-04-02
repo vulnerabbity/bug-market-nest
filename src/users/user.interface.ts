@@ -12,4 +12,4 @@ registerEnumType(UserRolesEnum, { name: "UserRolesEnum" })
 // converts enum to union type
 export type UserRole = `${UserRolesEnum}`
 
-export type UploadAvatarDto = Omit<PublicFileDto, "url">
+export type UploadAvatarDto = PublicFileDto
