@@ -47,8 +47,11 @@ export class Product implements IEntityWithId {
   description?: string
 
   @Field(() => [String])
-  @Prop()
   imagesUrls!: string[]
+
+  @Field(() => [String])
+  @Prop()
+  imagesIds!: string[]
 
   @Min(0)
   @Field({ defaultValue: 0 })

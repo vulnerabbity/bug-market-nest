@@ -44,8 +44,10 @@ export class User implements IEntityWithId {
   password!: string
 
   @Field({ nullable: true })
-  @Prop()
   avatarUrl?: string
+
+  @Prop({ index: true })
+  avatarId?: string
 
   @IsOptional()
   @MaxLength(500)

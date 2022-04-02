@@ -8,8 +8,8 @@ export class PublicFilesController {
 
   @Get(":fileUrl")
   public async shareFile(@Param("fileUrl") fileUrl: string, @Res() response: Response) {
-    const file = await this.publicFilesService.findByUrl(fileUrl)
-
+    const fileId = this.publicFilesService.parseFileIdFromUrl(fileUrl)
+    const file = await this.publicFilesService.findByUrlOrFail(fileId)
     response.contentType(file.mimetype)
     response.send(file.data)
   }

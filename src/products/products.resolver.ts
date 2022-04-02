@@ -1,4 +1,4 @@
-import { Args, Mutation, Query, Resolver } from "@nestjs/graphql"
+import { Args, Mutation, Parent, Query, ResolveField, Resolver } from "@nestjs/graphql"
 import { Request } from "express"
 import { CheckPolicies } from "src/auth/authorization/abilities/decorators/check-policies.decorator"
 import { Pagination } from "src/common/objects/pagination.input"
@@ -16,6 +16,7 @@ import { CreateProductInput, UpdateProductInput } from "./dto/input/product.inpu
 import { MongooseFilteredSearchingQuery } from "src/common/interface/mongoose.interface"
 import { CategoriesService } from "src/categories/categories.service"
 import { BadRequestException } from "@nestjs/common"
+import { PublicFilesService } from "src/files/public/public-files.service"
 
 @Resolver(() => Product)
 export class ProductsResolver {
@@ -23,7 +24,8 @@ export class ProductsResolver {
 
   constructor(
     private productsService: ProductsService,
-    private requestsParser: RequestsParserService
+    private requestsParser: RequestsParserService,
+    private publicFilesService: PublicFilesService
   ) {}
 
   @Query(() => Product, { name: "product" })
@@ -102,6 +104,13 @@ export class ProductsResolver {
 
     await this.productsService.deleteProductAndAllImagesById(productId)
     return product
+  }
+
+  @ResolveField(() => [String], { name: "imagesUrls" })
+  public async resolveImageUrls(@Parent() product: Product) {
+    return product.imagesIds.map(
+      async imageId => await this.publicFilesService.createUrlForFileId(imageId)
+    )
   }
 
   private failIfCategoryNotExists(categoryName: string): void {
