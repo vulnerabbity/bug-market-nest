@@ -25,6 +25,11 @@ export const appConfig = {
   },
   core: {
     host: process.env.HOST ?? "http://localhost:3000"
+  },
+  compression: {
+    get imagesQuality(): number {
+      return Number(process.env.IMAGES_QUALITY!)
+    }
   }
 }
 

@@ -28,8 +28,7 @@ import { ProductsService } from "./products.service"
 export class ProductsController {
   constructor(
     private productsService: ProductsService,
-    private requestsParser: RequestsParserService,
-    private publicFilesService: PublicFilesService
+    private requestsParser: RequestsParserService
   ) {}
 
   @CheckPolicies()
