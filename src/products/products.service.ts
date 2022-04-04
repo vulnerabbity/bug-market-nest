@@ -3,6 +3,7 @@ import { MongooseFilteredSearchingQuery } from "src/common/interface/mongoose.in
 import { IPaginatedEntities } from "src/common/interface/paginated-entity.interface"
 import { ModelsInjectorService } from "src/common/models/injector/models-injector.service"
 import { MongooseCaslService } from "src/common/service/mongoose-casl.service"
+import { ImageCompressionService } from "src/files/image-compression/image-compression.service"
 import { PublicFileDto } from "src/files/public/dto/public-file.dto"
 import { PublicFilesService } from "src/files/public/public-files.service"
 import { Product, ProductFilterQuery } from "./product.entity"
@@ -13,7 +14,8 @@ export class ProductsService extends MongooseCaslService<Product> {
 
   constructor(
     private publicFilesService: PublicFilesService,
-    private modelsInjector: ModelsInjectorService
+    private modelsInjector: ModelsInjectorService,
+    private imageCompressor: ImageCompressionService
   ) {
     super(modelsInjector.productModel)
   }
@@ -39,6 +41,9 @@ export class ProductsService extends MongooseCaslService<Product> {
   }
 
   public async uploadImageFileAndAddIdToProduct(dto: PublicFileDto, product: Product) {
+    const compressedImage = await this.imageCompressor.compressToWebp(dto.data)
+    dto = { ...dto, data: compressedImage }
+
     await this.addImageId(dto.id, product)
     await this.publicFilesService.upload(dto)
   }
