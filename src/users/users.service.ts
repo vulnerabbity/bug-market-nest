@@ -27,7 +27,22 @@ export class UsersService extends MongooseCaslService<User> {
     return await this.updateAvatarId(uploadAvatarData.id, uploadAvatarData.userId)
   }
 
+  public async deleteAvatar({
+    userId,
+    avatarId
+  }: {
+    userId: string
+    avatarId: string
+  }): Promise<void> {
+    await this.publicFilesService.deleteByIdOrFail(avatarId)
+    await this.deleteAvatarId(userId)
+  }
+
   private async updateAvatarId(newId: string, userId: string): Promise<User> {
     return await this.updateByIdOrFail(userId, { avatarId: newId })
+  }
+
+  private async deleteAvatarId(userId: string): Promise<void> {
+    await this.updateByIdOrFail(userId, { avatarId: undefined })
   }
 }

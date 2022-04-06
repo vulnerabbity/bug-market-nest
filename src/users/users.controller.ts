@@ -1,4 +1,13 @@
-import { Controller, Param, Post, Req, UploadedFile, UseGuards } from "@nestjs/common"
+import {
+  Controller,
+  Delete,
+  NotFoundException,
+  Param,
+  Post,
+  Req,
+  UploadedFile,
+  UseGuards
+} from "@nestjs/common"
 import { Request } from "express"
 import { JwtAuthenticationGuard } from "src/auth/authentication/guards/jwt-authentication.guard"
 import { ImageUploadEndpoint } from "src/files/decorators/image-upload-endpoint.decorator"
@@ -6,7 +15,6 @@ import { MEGABYTE_IN_BYTES } from "src/files/files.constants"
 import { MulterFile } from "src/files/multer/interface.multer"
 import { PublicFileResponse } from "src/files/public/public-files.interface"
 import { RequestsParserService } from "src/parsers/requests/requests-parser.service"
-import { v4 as uuidV4 } from "uuid"
 import { UploadAvatarDto } from "./user.interface"
 import { UsersService } from "./users.service"
 
@@ -16,7 +24,7 @@ export class UsersController {
 
   @Post(":userId/avatar")
   @UseGuards(JwtAuthenticationGuard)
-  @ImageUploadEndpoint("avatar", { limits: { fileSize: MEGABYTE_IN_BYTES } })
+  @ImageUploadEndpoint("avatar", { limits: { fileSize: 10 * MEGABYTE_IN_BYTES } })
   public async createAvatar(
     @UploadedFile() uploadedAvatar: MulterFile,
     @Param("userId") userId: string,
@@ -35,7 +43,25 @@ export class UsersController {
       id: newId
     }
 
-    await this.usersService.uploadAvatar(avatarDto)
-    return { success: true, message: "Avatar uploaded", imageId: newId }
+    const { avatarId } = await this.usersService.uploadAvatar(avatarDto)
+    return { success: true, message: "Avatar uploaded", imageId: avatarId! }
+  }
+
+  @Delete(":userId/avatar")
+  @UseGuards(JwtAuthenticationGuard)
+  public async deleteAvatar(@Param("userId") userId: string, @Req() request: Request) {
+    const requester = this.requestsParser.parseRolesOwnerOrFail(request)
+    const userToUpdate = await this.usersService.findByIdOrFail(userId)
+
+    this.usersService.failIfUpdatingForbidden({ subject: userToUpdate, requester })
+
+    if (!userToUpdate.avatarId) {
+      throw new NotFoundException("User dont have avatar")
+    }
+
+    await this.usersService.deleteAvatar({
+      userId: userToUpdate.id,
+      avatarId: userToUpdate.avatarId
+    })
   }
 }
