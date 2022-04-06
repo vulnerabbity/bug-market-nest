@@ -86,6 +86,9 @@ export class ProductSorting {
 export class ProductFilters {
   @Field(() => Range, { nullable: true })
   priceRange?: Range
+
+  @Field(() => String, { nullable: true })
+  categoryName?: string
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product)

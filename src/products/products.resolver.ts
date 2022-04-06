@@ -40,13 +40,13 @@ export class ProductsResolver {
     @Args({ nullable: true, name: "pagination" }) pagination?: Pagination,
     @Args({ nullable: true, name: "sorting" }) sorting?: ProductSorting
   ) {
-    // TODO: refactoring
+    // TODO: refactoring x2
     let filter: ProductFilterQuery = {}
-    if (filtering) {
-      const { priceRange } = filtering
-      filter = {
-        price: { $gte: priceRange?.min, $lte: priceRange?.max }
-      }
+    if (filtering?.priceRange) {
+      filter.price = { $gte: filtering.priceRange.min, $lte: filtering.priceRange.max }
+    }
+    if (filtering?.categoryName) {
+      filter.categoryName = filtering.categoryName
     }
 
     const searchQuery: MongooseFilteredSearchingQuery<Product> = {
@@ -54,7 +54,6 @@ export class ProductsResolver {
       sorting,
       filter
     }
-
     return await this.productsService.findManyPaginated(searchQuery, fuzzySearch)
   }
 
