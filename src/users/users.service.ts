@@ -4,11 +4,15 @@ import { UploadAvatarDto } from "./user.interface"
 import { PublicFilesService } from "src/files/public/public-files.service"
 import { MongooseCaslService } from "src/common/service/mongoose-casl.service"
 import { ModelsInjectorService } from "src/common/models/injector/models-injector.service"
+import { ImageCompressionService } from "src/files/image-compression/image-compression.service"
 
 @Injectable()
 export class UsersService extends MongooseCaslService<User> {
   @Inject()
   private publicFilesService!: PublicFilesService
+
+  @Inject()
+  private imageCompressor!: ImageCompressionService
 
   constructor(private modelsInjector: ModelsInjectorService) {
     super(modelsInjector.userModel)
@@ -23,6 +27,8 @@ export class UsersService extends MongooseCaslService<User> {
   }
 
   public async uploadAvatar(uploadAvatarData: UploadAvatarDto): Promise<User> {
+    const compressedAvatar = await this.imageCompressor.compressToWebp(uploadAvatarData.data)
+    uploadAvatarData = { ...uploadAvatarData, data: compressedAvatar }
     await this.publicFilesService.upload(uploadAvatarData)
     return await this.updateAvatarId(uploadAvatarData.id, uploadAvatarData.userId)
   }
