@@ -24,7 +24,8 @@ export const appConfig = {
     geonamesUsername: process.env.GEONAMES_USERNAME!
   },
   core: {
-    host: process.env.HOST ?? "http://localhost:3000"
+    host: process.env.HOST ?? "http://localhost:3000",
+    port: process.env.PORT ?? 3000
   },
   compression: {
     get imagesQuality(): number {

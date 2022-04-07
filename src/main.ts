@@ -2,6 +2,7 @@ import { ValidationPipe } from "@nestjs/common"
 import { NestFactory } from "@nestjs/core"
 import { AppModule } from "./app.module"
 import slowDown from "express-slow-down"
+import { appConfig } from "./common/config"
 
 // allow 40 requests per minute without delay
 const requestsLimiter = slowDown({
@@ -18,6 +19,6 @@ async function bootstrap() {
   app.enableCors()
   app.use(requestsLimiter)
 
-  await app.listen(3000)
+  await app.listen(appConfig.core.port)
 }
 bootstrap()
