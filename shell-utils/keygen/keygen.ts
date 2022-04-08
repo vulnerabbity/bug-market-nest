@@ -20,7 +20,7 @@ async function main() {
   console.log()
   console.log(privateKey)
 
-  deleteTempDirectory()
+  await deleteTempDirectory()
 }
 
 main()
@@ -45,7 +45,7 @@ async function generatePublicKey(): Promise<string> {
     `openssl rsa -in ${tmpDir}/${privateKeyName} -pubout -outform PEM -out ${tmpDir}/${publicKeyName}`
   )
 
-  return readKey(`${tmpDir}/${privateKeyName}`)
+  return readKey(`${tmpDir}/${publicKeyName}`)
 }
 
 function readKey(path: string): string {
