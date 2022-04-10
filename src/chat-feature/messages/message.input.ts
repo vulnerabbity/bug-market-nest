@@ -1,13 +1,8 @@
-import { InputType, OmitType, PickType } from "@nestjs/graphql"
+import { InputType, ObjectType, OmitType, PickType } from "@nestjs/graphql"
 import { ChatMessage } from "./message.entity"
 
 @InputType()
-export class SendChatMessageInput extends OmitType(ChatMessage, [
-  "id",
-  "chatId",
-  "createdAt",
-  "updatedAt"
-]) {}
+class ChatMessageInput extends OmitType(ChatMessage, []) {}
 
 @InputType()
-export class DeleteChatMessageInput extends PickType(ChatMessage, ["id"]) {}
+export class SendChatMessageInput extends PickType(ChatMessageInput, ["text", "userId"]) {}
