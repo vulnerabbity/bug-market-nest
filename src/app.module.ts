@@ -8,6 +8,7 @@ import { ProductsModule } from "./products/products.module"
 import { PublicFilesModule } from "./files/public/public-files.module"
 import { CategoriesModule } from "./categories/categories.module"
 import { ModelsInjectorModule } from "./common/models/injector/models-injector.module"
+import { ChatFeatureModule } from "./chat-feature/chat-feature.module"
 
 @Module({
   imports: [
@@ -18,7 +19,8 @@ import { ModelsInjectorModule } from "./common/models/injector/models-injector.m
     ProductsModule,
     PublicFilesModule,
     CategoriesModule,
-    ModelsInjectorModule
+    ModelsInjectorModule,
+    ChatFeatureModule
   ],
   providers: []
 })
