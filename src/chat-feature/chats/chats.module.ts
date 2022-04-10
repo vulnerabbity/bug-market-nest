@@ -1,10 +1,13 @@
-import { Module, Provider } from "@nestjs/common"
+import { Global, Module, Provider } from "@nestjs/common"
 import { ChatsResolver } from "./chats.resolver"
 import { ChatsService } from "./chats.service"
 
 const providers: Provider[] = [ChatsService, ChatsResolver]
+const chatExports: Provider[] = [ChatsService]
 
+@Global()
 @Module({
-  providers
+  providers,
+  exports: chatExports
 })
 export class ChatsModule {}
