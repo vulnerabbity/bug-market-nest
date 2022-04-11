@@ -28,7 +28,14 @@ export class ChatsService extends MongooseService<Chat> {
 
   async getChatsPaginated(userId: string, pagination?: Pagination): Promise<PaginatedChats> {
     const ownChatsFilter: ChatFilterQuery = { peersIds: { $all: [userId] } }
-    const chats = await this.findManyPaginated({ filter: ownChatsFilter, pagination })
+
+    const latestFirst = { updatedAt: "desc" }
+
+    const chats = await this.findManyPaginated({
+      filter: ownChatsFilter,
+      pagination,
+      sorting: latestFirst
+    })
 
     return chats
   }
