@@ -38,6 +38,8 @@ export class ChatMessagesService extends MongooseService<ChatMessage> {
     const { id: chatId } = await this.createChatIfNotExists(input)
     const sendedMessage = await this.createMessageOrFail({ chatId, text, userId: senderId })
 
+    await this.chatsService.updateUpdatedAtOrFail(chatId)
+
     return sendedMessage
   }
 

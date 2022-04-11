@@ -40,6 +40,10 @@ export class ChatsService extends MongooseService<Chat> {
     }
   }
 
+  async updateUpdatedAtOrFail(chatId: string, updatedAt = new Date()): Promise<Chat> {
+    return await this.updateByIdOrFail(chatId, { updatedAt })
+  }
+
   private async createChat(input: CreateChatInput): Promise<Chat> {
     return await this.createOrFail(input)
   }

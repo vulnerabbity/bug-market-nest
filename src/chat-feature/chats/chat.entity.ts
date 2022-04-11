@@ -10,7 +10,7 @@ export type ChatModel = Model<ChatDocument>
 export type ChatFilterQuery = FilterQuery<ChatDocument>
 
 @ObjectType()
-@Schema()
+@Schema({ timestamps: true })
 export class Chat implements IEntityWithId {
   @Field()
   @MongooseIdProp()
@@ -19,6 +19,12 @@ export class Chat implements IEntityWithId {
   @Field(() => [String])
   @Prop({ required: true, index: true })
   peersIds!: String[]
+
+  @Field()
+  createdAt!: Date
+
+  @Field()
+  updatedAt!: Date
 }
 
 @ObjectType()
