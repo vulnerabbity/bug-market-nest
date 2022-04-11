@@ -1,7 +1,8 @@
 import { ForbiddenException, Injectable } from "@nestjs/common"
 import { ModelsInjectorService } from "src/common/models/injector/models-injector.service"
+import { Pagination } from "src/common/objects/pagination.input"
 import { MongooseService } from "src/common/service/mongoose.service"
-import { Chat } from "./chat.entity"
+import { Chat, ChatFilterQuery, PaginatedChats } from "./chat.entity"
 
 export interface CreateChatInput {
   peersIds: string[]
@@ -16,12 +17,20 @@ export class ChatsService extends MongooseService<Chat> {
   async createIfNotExists(input: CreateChatInput): Promise<Chat> {
     const { peersIds } = input
     try {
-      const existingChat = await this.findOneOrFail({ peersIds: { $all: peersIds } })
+      const searchPeersFilter = { peersIds: { $all: peersIds } }
+      const existingChat = await this.findOneOrFail(searchPeersFilter)
       return existingChat
     } catch {
       const createdChat = await this.createChat(input)
       return createdChat
     }
+  }
+
+  async getChatsPaginated(userId: string, pagination?: Pagination): Promise<PaginatedChats> {
+    const ownChatsFilter: ChatFilterQuery = { peersIds: { $all: [userId] } }
+    const chats = await this.findManyPaginated({ filter: ownChatsFilter, pagination })
+
+    return chats
   }
 
   failIfViewMessageDenied({ chat, requesterId }: { chat: Chat; requesterId: string }) {
