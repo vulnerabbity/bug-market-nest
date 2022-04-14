@@ -29,16 +29,24 @@ export class ChatMessagesResolver {
     const chat = await this.chatsService.findByIdOrFail(chatId)
     this.chatsService.failIfViewMessageDenied({ chat, requesterId })
 
-    // get last messages
-    const sorting = { createdAt: "desc" }
-
-    const messages = await this.messagesService.findManyPaginated({
-      filter: { chatId: chatId },
-      pagination,
-      sorting
-    })
+    const messages = await this.messagesService.findLastMessagesPaginated(chat.id, pagination)
 
     return messages
+  }
+
+  @CheckPolicies()
+  @Query(() => ChatMessage, { name: "lastMessage", nullable: true })
+  async getLastMessage(
+    @GraphqlRequest() req: Request,
+    @Args("chatId") chatId: string
+  ): Promise<ChatMessage | null> {
+    const requesterId = this.requestsParser.parseUserIdOrFail(req)
+
+    const chat = await this.chatsService.findByIdOrFail(chatId)
+    this.chatsService.failIfViewMessageDenied({ chat, requesterId })
+
+    const lastMessage = await this.messagesService.findLastMessageOrNull(chat.id)
+    return lastMessage
   }
 
   @CheckPolicies()
