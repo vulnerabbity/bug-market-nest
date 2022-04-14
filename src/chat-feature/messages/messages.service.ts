@@ -2,8 +2,9 @@ import { Injectable } from "@nestjs/common"
 import { ModelsInjectorService } from "src/common/models/injector/models-injector.service"
 import { MongooseService } from "src/common/service/mongoose.service"
 import { ChatsService } from "../chats/chats.service"
-import { ChatMessage } from "./message.entity"
+import { ChatMessage, ChatMessageFilterQuery, PaginatedChatMessages } from "./message.entity"
 import { UsersService } from "src/users/users.service"
+import { Pagination } from "src/common/objects/pagination.input"
 
 export interface BasicPeers {
   senderId: string
@@ -28,6 +29,27 @@ export class ChatMessagesService extends MongooseService<ChatMessage> {
     private usersService: UsersService
   ) {
     super(modelsInjector.chatMessageModel)
+  }
+
+  async findLastMessageOrNull(chatId: string): Promise<ChatMessage | null> {
+    const takeOnePagination: Pagination = { offset: 0, limit: 1 }
+    const { data: messages } = await this.findLastMessagesPaginated(chatId, takeOnePagination)
+    const lastMessage = messages[0]
+    if (lastMessage) {
+      return lastMessage
+    }
+
+    return null
+  }
+
+  async findLastMessagesPaginated(
+    chatId: string,
+    pagination?: Pagination
+  ): Promise<PaginatedChatMessages> {
+    const filterByChatId: ChatMessageFilterQuery = { chatId }
+    const lastFirst = { createdAt: "desc" }
+
+    return await this.findManyPaginated({ filter: filterByChatId, pagination, sorting: lastFirst })
   }
 
   async sendMessage(input: SendChatMessageInput): Promise<ChatMessage> {
