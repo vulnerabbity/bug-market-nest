@@ -21,4 +21,19 @@ export class ChatsResolver {
 
     return await this.chatsService.getChatsPaginated(requester, pagination)
   }
+
+  @CheckPolicies()
+  @Query(() => Chat, { name: "chat" })
+  async getConcreteChat(
+    @GraphqlRequest() req: Request,
+    @Args("chatId") chatId: string
+  ): Promise<Chat> {
+    const requesterId = this.requestsParser.parseUserIdOrFail(req)
+
+    const chat = await this.chatsService.findByIdOrFail(chatId)
+
+    this.chatsService.failIfViewMessageDenied({ chat, requesterId })
+
+    return chat
+  }
 }
