@@ -27,7 +27,7 @@ export class ChatsService extends MongooseService<Chat> {
   }
 
   async getChatsPaginated(userId: string, pagination?: Pagination): Promise<PaginatedChats> {
-    const ownChatsFilter: ChatFilterQuery = { peersIds: { $all: [userId] } }
+    const ownChatsFilter = this.getOwnChatsFilter(userId)
 
     const latestFirst = { updatedAt: "desc" }
 
@@ -38,6 +38,15 @@ export class ChatsService extends MongooseService<Chat> {
     })
 
     return chats
+  }
+
+  async getChatIds(userId: string): Promise<string[]> {
+    const ownChatsFilter = this.getOwnChatsFilter(userId)
+
+    const chats = await this.findMany({ filter: ownChatsFilter })
+    const chatIds = chats.map(chat => chat.id)
+
+    return chatIds
   }
 
   failIfViewMessageDenied({ chat, requesterId }: { chat: Chat; requesterId: string }) {
@@ -53,5 +62,10 @@ export class ChatsService extends MongooseService<Chat> {
 
   private async createChat(input: CreateChatInput): Promise<Chat> {
     return await this.createOrFail(input)
+  }
+
+  private getOwnChatsFilter(userId: string) {
+    const filter: ChatFilterQuery = { peersIds: { $all: [userId] } }
+    return filter
   }
 }
