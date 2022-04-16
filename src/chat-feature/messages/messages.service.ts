@@ -5,6 +5,7 @@ import { ChatsService } from "../chats/chats.service"
 import { ChatMessage, ChatMessageFilterQuery, PaginatedChatMessages } from "./message.entity"
 import { UsersService } from "src/users/users.service"
 import { Pagination } from "src/common/objects/pagination.input"
+import { ChatNotificationsGateway } from "../notifications/notifications.gateway"
 
 export interface BasicPeers {
   senderId: string
@@ -26,7 +27,8 @@ export class ChatMessagesService extends MongooseService<ChatMessage> {
   constructor(
     modelsInjector: ModelsInjectorService,
     private chatsService: ChatsService,
-    private usersService: UsersService
+    private usersService: UsersService,
+    private chatsNotifications: ChatNotificationsGateway
   ) {
     super(modelsInjector.chatMessageModel)
   }
@@ -61,6 +63,7 @@ export class ChatMessagesService extends MongooseService<ChatMessage> {
     const sendedMessage = await this.createMessageOrFail({ chatId, text, userId: senderId })
 
     await this.chatsService.updateUpdatedAtOrFail(chatId)
+    this.chatsNotifications.emitMessageSended(sendedMessage)
 
     return sendedMessage
   }
