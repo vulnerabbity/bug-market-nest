@@ -8,6 +8,11 @@ export interface CreateChatInput {
   peersIds: string[]
 }
 
+export interface ChatPermissionsCheckInput {
+  chat: Chat
+  requesterId: string
+}
+
 @Injectable()
 export class ChatsService extends MongooseService<Chat> {
   constructor(modelsInjector: ModelsInjectorService) {
@@ -49,7 +54,7 @@ export class ChatsService extends MongooseService<Chat> {
     return chatIds
   }
 
-  failIfViewMessageDenied({ chat, requesterId }: { chat: Chat; requesterId: string }) {
+  failIfViewMessageDenied({ chat, requesterId }: ChatPermissionsCheckInput) {
     const isChatPeer = chat.peersIds.includes(requesterId)
     if (isChatPeer === false) {
       throw new ForbiddenException("You are not member of this chat")
