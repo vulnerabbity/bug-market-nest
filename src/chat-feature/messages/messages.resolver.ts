@@ -48,16 +48,4 @@ export class ChatMessagesResolver {
     const lastMessage = await this.messagesService.findLastMessageOrNull(chat.id)
     return lastMessage
   }
-
-  @CheckPolicies()
-  @Mutation(() => ChatMessage, { name: "sendMessage" })
-  async sendMessage(
-    @Args("SendMessageInput") input: SendChatMessageInput,
-    @GraphqlRequest() req: Request
-  ): Promise<ChatMessage> {
-    const { text, userId: receiverId } = input
-
-    const senderId = this.requestsParser.parseUserIdOrFail(req)
-    return await this.messagesService.sendMessage({ receiverId, senderId, text })
-  }
 }

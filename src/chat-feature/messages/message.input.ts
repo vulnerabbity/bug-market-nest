@@ -1,8 +1,11 @@
 import { InputType, ObjectType, OmitType, PickType } from "@nestjs/graphql"
+import { IsString } from "class-validator"
 import { ChatMessage } from "./message.entity"
 
-@InputType()
-class ChatMessageInput extends OmitType(ChatMessage, []) {}
+export class SendChatMessageInput implements Partial<ChatMessage> {
+  @IsString()
+  text!: string
 
-@InputType()
-export class SendChatMessageInput extends PickType(ChatMessageInput, ["text", "userId"]) {}
+  @IsString()
+  userId!: string
+}
