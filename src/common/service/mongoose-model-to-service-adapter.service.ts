@@ -1,5 +1,5 @@
 import { BadRequestException, NotFoundException } from "@nestjs/common"
-import { Model, Document, FilterQuery } from "mongoose"
+import { Model, Document, FilterQuery, UpdateQuery } from "mongoose"
 import { MongooseFilteredSearchingQuery } from "../interface/mongoose.interface"
 import { IPaginatedEntities } from "../interface/paginated-entity.interface"
 
@@ -72,6 +72,15 @@ export abstract class MongooseModelToServiceAdapter<T> {
 
     const updatedDocument = await this.findOneOrFail(filter, projection)
     return updatedDocument
+  }
+
+  public async updateMany(
+    filter?: FilterQuery<T & Document>,
+    update?: UpdateQuery<T & Document>,
+    projection?: any
+  ) {
+    await this.documentModel.updateMany(filter, update)
+    return await this.documentModel.find(filter ?? {}, projection)
   }
 
   public async deleteOneOrFail(filter: FilterQuery<T & Document>): Promise<void> {
