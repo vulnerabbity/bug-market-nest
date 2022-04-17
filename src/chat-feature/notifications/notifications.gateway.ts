@@ -41,4 +41,9 @@ export class ChatNotificationsGateway {
     const room = message.chatId
     this.wsServer.in(room).emit("messageReceived", message)
   }
+
+  emitMessageUpdated(message: ChatMessage) {
+    const room = message.chatId
+    this.wsServer.in(room).emit("messageUpdated", message)
+  }
 }
