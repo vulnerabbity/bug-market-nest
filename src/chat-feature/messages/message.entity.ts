@@ -33,6 +33,10 @@ export class ChatMessage implements IEntityWithId {
   @Prop({ required: true, maxlength: 500 })
   text!: string
 
+  @Field(() => [String], { defaultValue: [] })
+  @Prop({ required: true, index: true, default: [] })
+  viewedBy: string[] = []
+
   @Field()
   createdAt!: Date
 
