@@ -75,7 +75,13 @@ export class ChatMessagesService extends MongooseService<ChatMessage> {
     }
 
     const messages = await this.updateMany(notViewedMessagesFilter, addViewerId)
-    return messages
+    this.emitMessagesUpdated(messages)
+  }
+
+  private emitMessagesUpdated(messages: ChatMessage[]) {
+    for (let message of messages) {
+      this.chatsNotifications.emitMessageUpdated(message)
+    }
   }
 
   private async createMessageOrFail(input: CreateChatMessageInput): Promise<ChatMessage> {
