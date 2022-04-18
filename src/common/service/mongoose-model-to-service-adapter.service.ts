@@ -1,5 +1,5 @@
 import { BadRequestException, NotFoundException } from "@nestjs/common"
-import { Model, Document, FilterQuery, UpdateQuery } from "mongoose"
+import { Model, Document, FilterQuery, UpdateQuery, QueryOptions } from "mongoose"
 import { MongooseFilteredSearchingQuery } from "../interface/mongoose.interface"
 import { IPaginatedEntities } from "../interface/paginated-entity.interface"
 
@@ -13,9 +13,12 @@ export abstract class MongooseModelToServiceAdapter<T> {
   constructor(protected documentModel: Model<T & Document>) {}
 
   /**Scan entire collection to get count. Slow for big collections */
-  public async getTotalCount(filter?: FilterQuery<T & Document>): Promise<number> {
+  public async getTotalCount(
+    filter?: FilterQuery<T & Document>,
+    options?: QueryOptions
+  ): Promise<number> {
     filter = filter ?? {}
-    return await this.documentModel.countDocuments(filter)
+    return await this.documentModel.countDocuments(filter, options)
   }
 
   /**Get estimated documents count using collection metadata. Fast for big collections */
