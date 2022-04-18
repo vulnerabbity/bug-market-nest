@@ -22,8 +22,16 @@ export interface CreateChatMessageInput {
   text: string
 }
 
+interface ViewMessagesInput {
+  chatId: string
+  viewerId: string
+}
+
 @Injectable()
 export class ChatMessagesService extends MongooseService<ChatMessage> {
+  // no need to get accurate number. Client will use 99+
+  private notViewedMessagesLimit = 100
+
   constructor(
     modelsInjector: ModelsInjectorService,
     private chatsService: ChatsService,
@@ -69,13 +77,39 @@ export class ChatMessagesService extends MongooseService<ChatMessage> {
   }
 
   async viewMessages(chatId: string, viewerId: string) {
-    const notViewedMessagesFilter: ChatMessageFilterQuery = { chatId, viewedBy: { $nin: viewerId } }
+    const filter = this.makeNotViewedPerChatFilter({ chatId, viewerId })
     const addViewerId = {
       $push: { viewedBy: viewerId }
     }
 
-    const messages = await this.updateMany(notViewedMessagesFilter, addViewerId)
+    const messages = await this.updateMany(filter, addViewerId)
     this.emitMessagesUpdated(messages)
+  }
+
+  async getNotViewedNumberPerChat(input: ViewMessagesInput) {
+    const { chatId, viewerId } = input
+    const filter = this.makeNotViewedPerChatFilter(input)
+
+    const limit = this.notViewedMessagesLimit
+
+    const notViewedNumber = await this.getTotalCount(filter, { limit })
+    return notViewedNumber
+  }
+
+  async getTotalNotViewedNumber(viewerId: string) {
+    const chatIds = await this.chatsService.getChatIds(viewerId)
+    // all messages in viewer's chats that not viewed by him
+    const filter: ChatMessageFilterQuery = {
+      chatId: { $in: chatIds },
+      viewedBy: { $nin: viewerId }
+    }
+
+    return await this.getTotalCount(filter, { limit: this.notViewedMessagesLimit })
+  }
+
+  private makeNotViewedPerChatFilter(input: ViewMessagesInput): ChatMessageFilterQuery {
+    const { chatId, viewerId } = input
+    return { chatId, viewedBy: { $nin: viewerId } }
   }
 
   private emitMessagesUpdated(messages: ChatMessage[]) {

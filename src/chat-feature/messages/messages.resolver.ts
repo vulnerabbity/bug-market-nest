@@ -19,7 +19,7 @@ export class ChatMessagesResolver {
 
   @CheckPolicies()
   @Query(() => PaginatedChatMessages, { name: "messages" })
-  async getMessages(
+  async getAll(
     @GraphqlRequest() req: Request,
     @Args("chatId") chatId: string,
     @Args("pagination", { nullable: true }) pagination?: Pagination
@@ -36,7 +36,7 @@ export class ChatMessagesResolver {
 
   @CheckPolicies()
   @Query(() => ChatMessage, { name: "lastMessage", nullable: true })
-  async getLastMessage(
+  async getLast(
     @GraphqlRequest() req: Request,
     @Args("chatId") chatId: string
   ): Promise<ChatMessage | null> {
@@ -47,5 +47,29 @@ export class ChatMessagesResolver {
 
     const lastMessage = await this.messagesService.findLastMessageOrNull(chat.id)
     return lastMessage
+  }
+
+  @CheckPolicies()
+  @Query(() => Number, { name: "notViewedMessagesPerChat" })
+  async getNotViewedNumberPerChat(
+    @GraphqlRequest() req: Request,
+    @Args("chatId") chatId: string
+  ): Promise<number> {
+    const requesterId = this.requestsParser.parseUserIdOrFail(req)
+
+    const chat = await this.chatsService.findByIdOrFail(chatId)
+    this.chatsService.failIfViewMessageDenied({ chat, requesterId })
+
+    const number = this.messagesService.getNotViewedNumberPerChat({ chatId, viewerId: requesterId })
+    return number
+  }
+
+  @CheckPolicies()
+  @Query(() => Number, { name: "notViewedMessagesTotal" })
+  async getNotViewedTotal(@GraphqlRequest() req: Request) {
+    const requesterId = this.requestsParser.parseUserIdOrFail(req)
+
+    const number = this.messagesService.getTotalNotViewedNumber(requesterId)
+    return number
   }
 }
