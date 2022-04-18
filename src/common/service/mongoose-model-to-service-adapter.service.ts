@@ -79,8 +79,15 @@ export abstract class MongooseModelToServiceAdapter<T> {
     update?: UpdateQuery<T & Document>,
     projection?: any
   ) {
+    const documentsWithId: { id: string }[] = await this.documentModel.find(filter ?? {}, {
+      id: true
+    })
+    // get ids because after update filter may be not relevant
+    const documentsIds = documentsWithId.map(document => document.id)
+
     await this.documentModel.updateMany(filter, update)
-    return await this.documentModel.find(filter ?? {}, projection)
+
+    return await this.documentModel.find({ id: { $in: documentsIds } }, projection)
   }
 
   public async deleteOneOrFail(filter: FilterQuery<T & Document>): Promise<void> {
