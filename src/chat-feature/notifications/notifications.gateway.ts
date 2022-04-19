@@ -19,6 +19,20 @@ import { Chat } from "../chats/chat.entity"
 import { ChatsService } from "../chats/chats.service"
 import { ChatMessage } from "../messages/message.entity"
 
+export interface TotalNotViewedMessagesChangedInput {
+  number: number
+  userId: string
+}
+
+export interface NotViewedMessagesChangedPerChatInput extends TotalNotViewedMessagesChangedInput {
+  chatId: string
+}
+
+interface ConcreteChatNotViewedChangedResponse {
+  number: number
+  chatId: string
+}
+
 @UseGuards(JwtWebsocketsAuthenticationGuard)
 @WebSocketGateway(appConfig.websockets.port, {
   cors: { origin: "*" }
@@ -48,7 +62,17 @@ export class ChatNotificationsGateway {
     this.wsServer.in(room).emit("messageUpdated", message)
   }
 
-  emitTotalNotViewedMessagesChanged(number: number, room: string) {
+  emitTotalNotViewedMessagesChanged(input: TotalNotViewedMessagesChangedInput) {
+    const { number, userId } = input
+
+    const room = userId
     this.wsServer.in(room).emit("totalNotViewedMessagesChanged", number)
+  }
+
+  emitConcreteChatNotViewedMessagesChanged(input: NotViewedMessagesChangedPerChatInput) {
+    const { number, userId, chatId } = input
+
+    const response: ConcreteChatNotViewedChangedResponse = { number, chatId }
+    this.wsServer.in(userId).emit("concreteChatNotViewedMessagesChanged", response)
   }
 }

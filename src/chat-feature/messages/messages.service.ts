@@ -85,12 +85,11 @@ export class ChatMessagesService extends MongooseService<ChatMessage> {
     const updatedMessages = await this.updateMany(filter, addViewerId)
     if (updatedMessages.length > 0) {
       this.emitMessagesUpdated(updatedMessages)
-      this.emitTotalNotViewedChanged(chatId)
+      this.emitNotViewedChanged(chatId)
     }
   }
 
   async getNotViewedNumberPerChat(input: ViewMessagesInput) {
-    const { chatId, viewerId } = input
     const filter = this.makeNotViewedPerChatFilter(input)
 
     const limit = this.notViewedMessagesLimit
@@ -110,24 +109,35 @@ export class ChatMessagesService extends MongooseService<ChatMessage> {
     return await this.getTotalCount(filter, { limit: this.notViewedMessagesLimit })
   }
 
-  private async emitTotalNotViewedChanged(chatId: string) {
+  private async emitNotViewedChanged(chatId: string) {
     const { peersIds } = await this.chatsService.findByIdOrFail(chatId)
+    // TODO: Split into chunks
 
     for (let peerId of peersIds) {
-      const notViewedNumber = await this.getTotalNotViewedNumber(peerId)
-      this.chatsNotifications.emitTotalNotViewedMessagesChanged(notViewedNumber, peerId)
-    }
-  }
+      const totalNotViewedNumber = await this.getTotalNotViewedNumber(peerId)
+      this.chatsNotifications.emitTotalNotViewedMessagesChanged({
+        number: totalNotViewedNumber,
+        userId: peerId
+      })
 
-  private makeNotViewedPerChatFilter(input: ViewMessagesInput): ChatMessageFilterQuery {
-    const { chatId, viewerId } = input
-    return { chatId, viewedBy: { $nin: viewerId } }
+      const notViewedPerChat = await this.getNotViewedNumberPerChat({ chatId, viewerId: peerId })
+      this.chatsNotifications.emitConcreteChatNotViewedMessagesChanged({
+        chatId,
+        userId: peerId,
+        number: notViewedPerChat
+      })
+    }
   }
 
   private emitMessagesUpdated(messages: ChatMessage[]) {
     for (let message of messages) {
       this.chatsNotifications.emitMessageUpdated(message)
     }
+  }
+
+  private makeNotViewedPerChatFilter(input: ViewMessagesInput): ChatMessageFilterQuery {
+    const { chatId, viewerId } = input
+    return { chatId, viewedBy: { $nin: viewerId } }
   }
 
   private async createMessageOrFail(input: CreateChatMessageInput): Promise<ChatMessage> {
