@@ -33,8 +33,9 @@ export class ChatNotificationsGateway {
   async onJoinChatsNotifications(@ConnectedSocket() client: Socket, @WSRequest() req: Request) {
     const { userId }: AccessTokenPayload = req.user as AccessTokenPayload
     const chatsIds = await this.chatsService.getChatIds(userId)
+    const rooms = [...chatsIds, userId]
 
-    client.join(chatsIds)
+    client.join(rooms)
   }
 
   emitMessageSended(message: ChatMessage) {
@@ -45,5 +46,9 @@ export class ChatNotificationsGateway {
   emitMessageUpdated(message: ChatMessage) {
     const room = message.chatId
     this.wsServer.in(room).emit("messageUpdated", message)
+  }
+
+  emitTotalNotViewedMessagesChanged(number: number, room: string) {
+    this.wsServer.in(room).emit("totalNotViewedMessagesChanged", number)
   }
 }
