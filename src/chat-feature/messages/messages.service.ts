@@ -82,8 +82,11 @@ export class ChatMessagesService extends MongooseService<ChatMessage> {
       $push: { viewedBy: viewerId }
     }
 
-    const messages = await this.updateMany(filter, addViewerId)
-    this.emitMessagesUpdated(messages)
+    const updatedMessages = await this.updateMany(filter, addViewerId)
+    if (updatedMessages.length > 0) {
+      this.emitMessagesUpdated(updatedMessages)
+      this.emitTotalNotViewedChanged(chatId)
+    }
   }
 
   async getNotViewedNumberPerChat(input: ViewMessagesInput) {
@@ -105,6 +108,15 @@ export class ChatMessagesService extends MongooseService<ChatMessage> {
     }
 
     return await this.getTotalCount(filter, { limit: this.notViewedMessagesLimit })
+  }
+
+  private async emitTotalNotViewedChanged(chatId: string) {
+    const { peersIds } = await this.chatsService.findByIdOrFail(chatId)
+
+    for (let peerId of peersIds) {
+      const notViewedNumber = await this.getTotalNotViewedNumber(peerId)
+      this.chatsNotifications.emitTotalNotViewedMessagesChanged(notViewedNumber, peerId)
+    }
   }
 
   private makeNotViewedPerChatFilter(input: ViewMessagesInput): ChatMessageFilterQuery {
