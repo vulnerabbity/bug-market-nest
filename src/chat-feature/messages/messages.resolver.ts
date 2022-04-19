@@ -19,7 +19,7 @@ export class ChatMessagesResolver {
 
   @CheckPolicies()
   @Query(() => PaginatedChatMessages, { name: "messages" })
-  async getMessages(
+  async getAll(
     @GraphqlRequest() req: Request,
     @Args("chatId") chatId: string,
     @Args("pagination", { nullable: true }) pagination?: Pagination
@@ -29,27 +29,47 @@ export class ChatMessagesResolver {
     const chat = await this.chatsService.findByIdOrFail(chatId)
     this.chatsService.failIfViewMessageDenied({ chat, requesterId })
 
-    // get last messages
-    const sorting = { createdAt: "desc" }
-
-    const messages = await this.messagesService.findManyPaginated({
-      filter: { chatId: chatId },
-      pagination,
-      sorting
-    })
+    const messages = await this.messagesService.findLastMessagesPaginated(chat.id, pagination)
 
     return messages
   }
 
   @CheckPolicies()
-  @Mutation(() => ChatMessage, { name: "sendMessage" })
-  async sendMessage(
-    @Args("SendMessageInput") input: SendChatMessageInput,
-    @GraphqlRequest() req: Request
-  ): Promise<ChatMessage> {
-    const { text, userId: receiverId } = input
+  @Query(() => ChatMessage, { name: "lastMessage", nullable: true })
+  async getLast(
+    @GraphqlRequest() req: Request,
+    @Args("chatId") chatId: string
+  ): Promise<ChatMessage | null> {
+    const requesterId = this.requestsParser.parseUserIdOrFail(req)
 
-    const senderId = this.requestsParser.parseUserIdOrFail(req)
-    return await this.messagesService.sendMessage({ receiverId, senderId, text })
+    const chat = await this.chatsService.findByIdOrFail(chatId)
+    this.chatsService.failIfViewMessageDenied({ chat, requesterId })
+
+    const lastMessage = await this.messagesService.findLastMessageOrNull(chat.id)
+    return lastMessage
+  }
+
+  @CheckPolicies()
+  @Query(() => Number, { name: "notViewedMessagesPerChat" })
+  async getNotViewedNumberPerChat(
+    @GraphqlRequest() req: Request,
+    @Args("chatId") chatId: string
+  ): Promise<number> {
+    const requesterId = this.requestsParser.parseUserIdOrFail(req)
+
+    const chat = await this.chatsService.findByIdOrFail(chatId)
+    this.chatsService.failIfViewMessageDenied({ chat, requesterId })
+
+    const number = this.messagesService.getNotViewedNumberPerChat({ chatId, viewerId: requesterId })
+    return number
+  }
+
+  @CheckPolicies()
+  @Query(() => Number, { name: "notViewedMessagesTotal" })
+  async getNotViewedTotal(@GraphqlRequest() req: Request) {
+    const requesterId = this.requestsParser.parseUserIdOrFail(req)
+
+    const number = this.messagesService.getTotalNotViewedNumber(requesterId)
+    return number
   }
 }

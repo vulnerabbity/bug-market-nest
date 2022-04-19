@@ -27,6 +27,9 @@ export const appConfig = {
     host: process.env.HOST ?? "http://localhost:3000",
     port: process.env.PORT ?? 3000
   },
+  websockets: {
+    port: Number(process.env.WSPORT ?? 3003)
+  },
   compression: {
     get imagesQuality(): number {
       return Number(process.env.IMAGES_QUALITY!)

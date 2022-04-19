@@ -8,6 +8,11 @@ export interface CreateChatInput {
   peersIds: string[]
 }
 
+export interface ChatPermissionsCheckInput {
+  chat: Chat
+  requesterId: string
+}
+
 @Injectable()
 export class ChatsService extends MongooseService<Chat> {
   constructor(modelsInjector: ModelsInjectorService) {
@@ -27,7 +32,7 @@ export class ChatsService extends MongooseService<Chat> {
   }
 
   async getChatsPaginated(userId: string, pagination?: Pagination): Promise<PaginatedChats> {
-    const ownChatsFilter: ChatFilterQuery = { peersIds: { $all: [userId] } }
+    const ownChatsFilter = this.getOwnChatsFilter(userId)
 
     const latestFirst = { updatedAt: "desc" }
 
@@ -40,7 +45,16 @@ export class ChatsService extends MongooseService<Chat> {
     return chats
   }
 
-  failIfViewMessageDenied({ chat, requesterId }: { chat: Chat; requesterId: string }) {
+  async getChatIds(userId: string): Promise<string[]> {
+    const ownChatsFilter = this.getOwnChatsFilter(userId)
+
+    const chats = await this.findMany({ filter: ownChatsFilter })
+    const chatIds = chats.map(chat => chat.id)
+
+    return chatIds
+  }
+
+  failIfViewMessageDenied({ chat, requesterId }: ChatPermissionsCheckInput) {
     const isChatPeer = chat.peersIds.includes(requesterId)
     if (isChatPeer === false) {
       throw new ForbiddenException("You are not member of this chat")
@@ -53,5 +67,10 @@ export class ChatsService extends MongooseService<Chat> {
 
   private async createChat(input: CreateChatInput): Promise<Chat> {
     return await this.createOrFail(input)
+  }
+
+  private getOwnChatsFilter(userId: string) {
+    const filter: ChatFilterQuery = { peersIds: { $all: [userId] } }
+    return filter
   }
 }

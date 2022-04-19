@@ -18,7 +18,7 @@ export class Chat implements IEntityWithId {
 
   @Field(() => [String])
   @Prop({ required: true, index: true })
-  peersIds!: String[]
+  peersIds!: string[]
 
   @Field()
   createdAt!: Date
