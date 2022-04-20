@@ -7,15 +7,6 @@ import { UsersService } from "src/users/users.service"
 import { Pagination } from "src/common/objects/pagination.input"
 import { ChatNotificationsGateway } from "../notifications/notifications.gateway"
 
-export interface BasicPeers {
-  senderId: string
-  receiverId: string
-}
-
-interface SendChatMessageInput extends BasicPeers {
-  text: string
-}
-
 export interface CreateChatMessageInput {
   chatId: string
   userId: string
@@ -62,16 +53,16 @@ export class ChatMessagesService extends MongooseService<ChatMessage> {
     return await this.findManyPaginated({ filter: filterByChatId, pagination, sorting: lastFirst })
   }
 
-  async sendMessage(input: SendChatMessageInput): Promise<ChatMessage> {
-    const { text, senderId, receiverId } = input
+  async sendMessage(input: CreateChatMessageInput): Promise<ChatMessage> {
+    const { text, userId: senderId, chatId } = input
 
-    await this.usersService.failIfIdNotExists(receiverId)
+    const chat = await this.chatsService.findByIdOrFail(chatId)
+    await this.usersService.failIfIdNotExists(senderId)
 
-    const { id: chatId } = await this.createChatIfNotExists(input)
     const sendedMessage = await this.createMessageOrFail({ chatId, text, userId: senderId })
 
     await this.chatsService.updateUpdatedAtOrFail(chatId)
-    this.chatsNotifications.emitMessageSended(sendedMessage)
+    this.chatsNotifications.emitMessageSended(sendedMessage, chat)
 
     return sendedMessage
   }
@@ -84,7 +75,7 @@ export class ChatMessagesService extends MongooseService<ChatMessage> {
 
     const updatedMessages = await this.updateMany(filter, addViewerId)
     if (updatedMessages.length > 0) {
-      this.emitMessagesUpdated(updatedMessages)
+      await this.emitMessagesUpdated(updatedMessages, chatId)
       this.emitNotViewedChanged(chatId)
     }
   }
@@ -129,9 +120,14 @@ export class ChatMessagesService extends MongooseService<ChatMessage> {
     }
   }
 
-  private emitMessagesUpdated(messages: ChatMessage[]) {
+  private async emitMessagesUpdated(messages: ChatMessage[], chatId: string) {
+    if (messages.length === 0) {
+      return
+    }
+    const chat = await this.chatsService.findByIdOrFail(chatId)
+
     for (let message of messages) {
-      this.chatsNotifications.emitMessageUpdated(message)
+      this.chatsNotifications.emitMessageUpdated(message, chat)
     }
   }
 
@@ -142,13 +138,5 @@ export class ChatMessagesService extends MongooseService<ChatMessage> {
 
   private async createMessageOrFail(input: CreateChatMessageInput): Promise<ChatMessage> {
     return await this.createOrFail(input)
-  }
-
-  private async createChatIfNotExists(input: SendChatMessageInput) {
-    const { receiverId, senderId } = input
-    const peersIds = [receiverId, senderId]
-
-    const chat = await this.chatsService.createIfNotExists({ peersIds })
-    return chat
   }
 }
