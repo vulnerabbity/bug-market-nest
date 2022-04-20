@@ -25,16 +25,16 @@ export class ChatsService extends MongooseService<Chat> {
     super(modelsInjector.chatModel)
   }
 
-  async createAndNotifyIfNotExists(input: CreateChatInput): Promise<Chat> {
-    const { peersIds } = input
-    await this.failIfPeersDontExists(peersIds)
+  async initIfNotExistsAndNotifyOrFail(input: CreateChatInput): Promise<Chat> {
+    let { peersIds } = input
+    await this.failIfCantInit(input)
 
     try {
       const searchPeersFilter = { peersIds: { $all: peersIds } }
       const existingChat = await this.findOneOrFail(searchPeersFilter)
       return existingChat
     } catch {
-      const createdChat = await this.createChat(input)
+      const createdChat = await this.createChat({ peersIds })
       this.chatsNotifications.emitChatCreated(createdChat)
       return createdChat
     }
@@ -84,6 +84,10 @@ export class ChatsService extends MongooseService<Chat> {
     return await this.updateByIdOrFail(chatId, { updatedAt })
   }
 
+  private async failIfCantInit(input: CreateChatInput) {
+    return this.failIfPeersDontExists(input.peersIds)
+  }
+
   private async failIfPeersDontExists(peersIds: string[]) {
     for (let peerId of peersIds) {
       await this.usersService.failIfIdNotExists(peerId)
@@ -91,6 +95,9 @@ export class ChatsService extends MongooseService<Chat> {
   }
 
   private async createChat(input: CreateChatInput): Promise<Chat> {
+    const uniquePeers = Array.from(new Set(input.peersIds))
+    input = { ...input, peersIds: uniquePeers }
+
     return await this.createOrFail(input)
   }
 

@@ -44,7 +44,7 @@ export class ChatsResolver {
 
     const peersIds = [requesterId, otherUserId]
 
-    const chat = await this.chatsService.createAndNotifyIfNotExists({ peersIds })
+    const chat = await this.chatsService.initIfNotExistsAndNotifyOrFail({ peersIds })
 
     return chat
   }
