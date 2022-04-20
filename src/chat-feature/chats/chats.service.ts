@@ -2,6 +2,8 @@ import { ForbiddenException, Injectable } from "@nestjs/common"
 import { ModelsInjectorService } from "src/common/models/injector/models-injector.service"
 import { Pagination } from "src/common/objects/pagination.input"
 import { MongooseService } from "src/common/service/mongoose.service"
+import { UsersService } from "src/users/users.service"
+import { ChatNotificationsGateway } from "../notifications/notifications.gateway"
 import { Chat, ChatFilterQuery, PaginatedChats } from "./chat.entity"
 
 export interface CreateChatInput {
@@ -15,20 +17,37 @@ export interface ChatPermissionsCheckInput {
 
 @Injectable()
 export class ChatsService extends MongooseService<Chat> {
-  constructor(modelsInjector: ModelsInjectorService) {
+  constructor(
+    private modelsInjector: ModelsInjectorService,
+    private usersService: UsersService,
+    private chatsNotifications: ChatNotificationsGateway
+  ) {
     super(modelsInjector.chatModel)
   }
 
-  async createIfNotExists(input: CreateChatInput): Promise<Chat> {
+  async createAndNotifyIfNotExists(input: CreateChatInput): Promise<Chat> {
     const { peersIds } = input
+    await this.failIfPeersDontExists(peersIds)
+
     try {
       const searchPeersFilter = { peersIds: { $all: peersIds } }
       const existingChat = await this.findOneOrFail(searchPeersFilter)
       return existingChat
     } catch {
       const createdChat = await this.createChat(input)
+      this.chatsNotifications.emitChatCreated(createdChat)
       return createdChat
     }
+  }
+
+  async deleteChatAndNotifyOrFail(chatId: string): Promise<Chat> {
+    const chat = await this.findByIdOrFail(chatId)
+    await this.deleteByIdOrFail(chatId)
+
+    await this.modelsInjector.chatMessageModel.deleteMany({ chatId })
+    this.chatsNotifications.emitChatDeleted(chat)
+
+    return chat
   }
 
   async getChatsPaginated(userId: string, pagination?: Pagination): Promise<PaginatedChats> {
@@ -54,15 +73,21 @@ export class ChatsService extends MongooseService<Chat> {
     return chatIds
   }
 
-  failIfViewMessageDenied({ chat, requesterId }: ChatPermissionsCheckInput) {
+  failIfManageChatDenied({ chat, requesterId }: ChatPermissionsCheckInput) {
     const isChatPeer = chat.peersIds.includes(requesterId)
     if (isChatPeer === false) {
-      throw new ForbiddenException("You are not member of this chat")
+      throw new ForbiddenException("You cant manage this chat")
     }
   }
 
   async updateUpdatedAtOrFail(chatId: string, updatedAt = new Date()): Promise<Chat> {
     return await this.updateByIdOrFail(chatId, { updatedAt })
+  }
+
+  private async failIfPeersDontExists(peersIds: string[]) {
+    for (let peerId of peersIds) {
+      await this.usersService.failIfIdNotExists(peerId)
+    }
   }
 
   private async createChat(input: CreateChatInput): Promise<Chat> {
