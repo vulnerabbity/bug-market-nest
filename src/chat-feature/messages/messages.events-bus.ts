@@ -7,7 +7,7 @@ import { ChatMessage } from "./message.entity"
 @Injectable()
 export class ChatMessagesEventsBus {
   constructor(private chatsEventsBus: ChatsEventsBus) {
-    this.subscribeToChatDelete()
+    this.subscribeToChatDeleted()
   }
 
   notViewedChanged$ = new Subject<Chat>()
@@ -18,7 +18,7 @@ export class ChatMessagesEventsBus {
 
   chatDeleted$ = new Subject<Chat>()
 
-  private subscribeToChatDelete() {
+  private subscribeToChatDeleted() {
     this.chatsEventsBus.chatDeleted$.subscribe(chat => this.chatDeleted$.next(chat))
   }
 }
