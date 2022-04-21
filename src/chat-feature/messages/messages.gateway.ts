@@ -34,9 +34,9 @@ export class ChatMessagesGateway {
     @WSRequest() req: Request
   ) {
     const { userId: senderId }: AccessTokenPayload = req.user as AccessTokenPayload
-    const { userId: receiverId, text } = messageInput
+    const { chatId, text } = messageInput
 
-    await this.messagesService.sendMessage({ receiverId, senderId, text })
+    await this.messagesService.sendMessage({ chatId, userId: senderId, text })
   }
 
   @UsePipes(new ValidationPipe())
@@ -54,7 +54,7 @@ export class ChatMessagesGateway {
 
   private failIfViewMessageDenied(input: ChatPermissionsCheckInput) {
     try {
-      this.chatsService.failIfViewMessageDenied(input)
+      this.chatsService.failIfManageChatDenied(input)
     } catch (err: any) {
       new WsException(err)
     }

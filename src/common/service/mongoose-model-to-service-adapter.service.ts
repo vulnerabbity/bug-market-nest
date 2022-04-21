@@ -81,7 +81,7 @@ export abstract class MongooseModelToServiceAdapter<T> {
     filter?: FilterQuery<T & Document>,
     update?: UpdateQuery<T & Document>,
     projection?: any
-  ) {
+  ): Promise<T[]> {
     const documentsWithId: { id: string }[] = await this.documentModel.find(filter ?? {}, {
       id: true
     })
@@ -102,11 +102,8 @@ export abstract class MongooseModelToServiceAdapter<T> {
     await this.deleteOneOrFail({ id: id })
   }
 
-  public async deleteManyOrFail(filter: FilterQuery<T & Document>): Promise<void> {
-    const { deletedCount } = await this.documentModel.deleteMany(filter)
-    if (deletedCount === 0) {
-      throw new BadRequestException("Nothing was deleted")
-    }
+  public async deleteMany(filter: FilterQuery<T & Document>): Promise<void> {
+    await this.documentModel.deleteMany(filter)
   }
 
   protected makeFindManyQuery(searchingQuery: MongooseFilteredSearchingQuery<T> = {}) {

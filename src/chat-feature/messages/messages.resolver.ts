@@ -27,7 +27,7 @@ export class ChatMessagesResolver {
     const requesterId = this.requestsParser.parseUserIdOrFail(req)
 
     const chat = await this.chatsService.findByIdOrFail(chatId)
-    this.chatsService.failIfViewMessageDenied({ chat, requesterId })
+    this.chatsService.failIfManageChatDenied({ chat, requesterId })
 
     const messages = await this.messagesService.findLastMessagesPaginated(chat.id, pagination)
 
@@ -43,7 +43,7 @@ export class ChatMessagesResolver {
     const requesterId = this.requestsParser.parseUserIdOrFail(req)
 
     const chat = await this.chatsService.findByIdOrFail(chatId)
-    this.chatsService.failIfViewMessageDenied({ chat, requesterId })
+    this.chatsService.failIfManageChatDenied({ chat, requesterId })
 
     const lastMessage = await this.messagesService.findLastMessageOrNull(chat.id)
     return lastMessage
@@ -58,7 +58,7 @@ export class ChatMessagesResolver {
     const requesterId = this.requestsParser.parseUserIdOrFail(req)
 
     const chat = await this.chatsService.findByIdOrFail(chatId)
-    this.chatsService.failIfViewMessageDenied({ chat, requesterId })
+    this.chatsService.failIfManageChatDenied({ chat, requesterId })
 
     const number = this.messagesService.getNotViewedNumberPerChat({ chatId, viewerId: requesterId })
     return number

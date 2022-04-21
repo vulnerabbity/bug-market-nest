@@ -6,15 +6,7 @@ import { ChatMessage, ChatMessageFilterQuery, PaginatedChatMessages } from "./me
 import { UsersService } from "src/users/users.service"
 import { Pagination } from "src/common/objects/pagination.input"
 import { ChatNotificationsGateway } from "../notifications/notifications.gateway"
-
-export interface BasicPeers {
-  senderId: string
-  receiverId: string
-}
-
-interface SendChatMessageInput extends BasicPeers {
-  text: string
-}
+import { ChatMessagesEventsBus } from "./messages.events-bus"
 
 export interface CreateChatMessageInput {
   chatId: string
@@ -36,7 +28,7 @@ export class ChatMessagesService extends MongooseService<ChatMessage> {
     modelsInjector: ModelsInjectorService,
     private chatsService: ChatsService,
     private usersService: UsersService,
-    private chatsNotifications: ChatNotificationsGateway
+    private messagesEventsBus: ChatMessagesEventsBus
   ) {
     super(modelsInjector.chatMessageModel)
   }
@@ -62,16 +54,16 @@ export class ChatMessagesService extends MongooseService<ChatMessage> {
     return await this.findManyPaginated({ filter: filterByChatId, pagination, sorting: lastFirst })
   }
 
-  async sendMessage(input: SendChatMessageInput): Promise<ChatMessage> {
-    const { text, senderId, receiverId } = input
+  async sendMessage(input: CreateChatMessageInput): Promise<ChatMessage> {
+    const { text, userId: senderId, chatId } = input
 
-    await this.usersService.failIfIdNotExists(receiverId)
+    const chat = await this.chatsService.findByIdOrFail(chatId)
+    await this.usersService.failIfIdNotExists(senderId)
 
-    const { id: chatId } = await this.createChatIfNotExists(input)
     const sendedMessage = await this.createMessageOrFail({ chatId, text, userId: senderId })
 
     await this.chatsService.updateUpdatedAtOrFail(chatId)
-    this.chatsNotifications.emitMessageSended(sendedMessage)
+    this.messagesEventsBus.messageSended$.next({ message: sendedMessage, chat })
 
     return sendedMessage
   }
@@ -81,11 +73,12 @@ export class ChatMessagesService extends MongooseService<ChatMessage> {
     const addViewerId = {
       $push: { viewedBy: viewerId }
     }
+    const chat = await this.chatsService.findByIdOrFail(chatId)
 
     const updatedMessages = await this.updateMany(filter, addViewerId)
     if (updatedMessages.length > 0) {
-      this.emitMessagesUpdated(updatedMessages)
-      this.emitNotViewedChanged(chatId)
+      this.messagesEventsBus.messagesUpdated$.next({ messages: updatedMessages, chatId })
+      this.messagesEventsBus.notViewedChanged$.next(chat)
     }
   }
 
@@ -109,32 +102,6 @@ export class ChatMessagesService extends MongooseService<ChatMessage> {
     return await this.getTotalCount(filter, { limit: this.notViewedMessagesLimit })
   }
 
-  private async emitNotViewedChanged(chatId: string) {
-    const { peersIds } = await this.chatsService.findByIdOrFail(chatId)
-    // TODO: Split into chunks
-
-    for (let peerId of peersIds) {
-      const totalNotViewedNumber = await this.getTotalNotViewedNumber(peerId)
-      this.chatsNotifications.emitTotalNotViewedMessagesChanged({
-        number: totalNotViewedNumber,
-        userId: peerId
-      })
-
-      const notViewedPerChat = await this.getNotViewedNumberPerChat({ chatId, viewerId: peerId })
-      this.chatsNotifications.emitConcreteChatNotViewedMessagesChanged({
-        chatId,
-        userId: peerId,
-        number: notViewedPerChat
-      })
-    }
-  }
-
-  private emitMessagesUpdated(messages: ChatMessage[]) {
-    for (let message of messages) {
-      this.chatsNotifications.emitMessageUpdated(message)
-    }
-  }
-
   private makeNotViewedPerChatFilter(input: ViewMessagesInput): ChatMessageFilterQuery {
     const { chatId, viewerId } = input
     return { chatId, viewedBy: { $nin: viewerId } }
@@ -142,13 +109,5 @@ export class ChatMessagesService extends MongooseService<ChatMessage> {
 
   private async createMessageOrFail(input: CreateChatMessageInput): Promise<ChatMessage> {
     return await this.createOrFail(input)
-  }
-
-  private async createChatIfNotExists(input: SendChatMessageInput) {
-    const { receiverId, senderId } = input
-    const peersIds = [receiverId, senderId]
-
-    const chat = await this.chatsService.createIfNotExists({ peersIds })
-    return chat
   }
 }
