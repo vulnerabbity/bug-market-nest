@@ -6,6 +6,7 @@ import { ChatMessage, ChatMessageFilterQuery, PaginatedChatMessages } from "./me
 import { UsersService } from "src/users/users.service"
 import { Pagination } from "src/common/objects/pagination.input"
 import { ChatNotificationsGateway } from "../notifications/notifications.gateway"
+import { ChatMessagesEventsBus } from "./messages.events-bus"
 
 export interface CreateChatMessageInput {
   chatId: string
@@ -27,7 +28,7 @@ export class ChatMessagesService extends MongooseService<ChatMessage> {
     modelsInjector: ModelsInjectorService,
     private chatsService: ChatsService,
     private usersService: UsersService,
-    private chatsNotifications: ChatNotificationsGateway
+    private messagesEventsBus: ChatMessagesEventsBus
   ) {
     super(modelsInjector.chatMessageModel)
   }
@@ -62,7 +63,7 @@ export class ChatMessagesService extends MongooseService<ChatMessage> {
     const sendedMessage = await this.createMessageOrFail({ chatId, text, userId: senderId })
 
     await this.chatsService.updateUpdatedAtOrFail(chatId)
-    this.chatsNotifications.emitMessageSended(sendedMessage, chat)
+    this.messagesEventsBus.messageSended$.next({ message: sendedMessage, chat })
 
     return sendedMessage
   }
@@ -72,11 +73,12 @@ export class ChatMessagesService extends MongooseService<ChatMessage> {
     const addViewerId = {
       $push: { viewedBy: viewerId }
     }
+    const chat = await this.chatsService.findByIdOrFail(chatId)
 
     const updatedMessages = await this.updateMany(filter, addViewerId)
     if (updatedMessages.length > 0) {
-      await this.emitMessagesUpdated(updatedMessages, chatId)
-      this.emitNotViewedChanged(chatId)
+      this.messagesEventsBus.messagesUpdated$.next({ messages: updatedMessages, chatId })
+      this.messagesEventsBus.notViewedChanged$.next(chat)
     }
   }
 
@@ -98,37 +100,6 @@ export class ChatMessagesService extends MongooseService<ChatMessage> {
     }
 
     return await this.getTotalCount(filter, { limit: this.notViewedMessagesLimit })
-  }
-
-  private async emitNotViewedChanged(chatId: string) {
-    const { peersIds } = await this.chatsService.findByIdOrFail(chatId)
-    // TODO: Split into chunks
-
-    for (let peerId of peersIds) {
-      const totalNotViewedNumber = await this.getTotalNotViewedNumber(peerId)
-      this.chatsNotifications.emitTotalNotViewedMessagesChanged({
-        number: totalNotViewedNumber,
-        userId: peerId
-      })
-
-      const notViewedPerChat = await this.getNotViewedNumberPerChat({ chatId, viewerId: peerId })
-      this.chatsNotifications.emitConcreteChatNotViewedMessagesChanged({
-        chatId,
-        userId: peerId,
-        number: notViewedPerChat
-      })
-    }
-  }
-
-  private async emitMessagesUpdated(messages: ChatMessage[], chatId: string) {
-    if (messages.length === 0) {
-      return
-    }
-    const chat = await this.chatsService.findByIdOrFail(chatId)
-
-    for (let message of messages) {
-      this.chatsNotifications.emitMessageUpdated(message, chat)
-    }
   }
 
   private makeNotViewedPerChatFilter(input: ViewMessagesInput): ChatMessageFilterQuery {

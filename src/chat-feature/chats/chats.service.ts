@@ -3,8 +3,8 @@ import { ModelsInjectorService } from "src/common/models/injector/models-injecto
 import { Pagination } from "src/common/objects/pagination.input"
 import { MongooseService } from "src/common/service/mongoose.service"
 import { UsersService } from "src/users/users.service"
-import { ChatNotificationsGateway } from "../notifications/notifications.gateway"
 import { Chat, ChatFilterQuery, PaginatedChats } from "./chat.entity"
+import { ChatsEventsBus } from "./chats.events-bus"
 
 export interface CreateChatInput {
   peersIds: string[]
@@ -20,12 +20,12 @@ export class ChatsService extends MongooseService<Chat> {
   constructor(
     private modelsInjector: ModelsInjectorService,
     private usersService: UsersService,
-    private chatsNotifications: ChatNotificationsGateway
+    private chatsEventsBus: ChatsEventsBus
   ) {
     super(modelsInjector.chatModel)
   }
 
-  async initIfNotExistsAndNotifyOrFail(input: CreateChatInput): Promise<Chat> {
+  async initIfNotExistsOrFail(input: CreateChatInput): Promise<Chat> {
     let { peersIds } = input
     await this.failIfCantInit(input)
 
@@ -35,17 +35,16 @@ export class ChatsService extends MongooseService<Chat> {
       return existingChat
     } catch {
       const createdChat = await this.createChat({ peersIds })
-      this.chatsNotifications.emitChatCreated(createdChat)
+      this.chatsEventsBus.chatCreated$.next(createdChat)
       return createdChat
     }
   }
 
-  async deleteChatAndNotifyOrFail(chatId: string): Promise<Chat> {
+  async deleteChatOrFail(chatId: string): Promise<Chat> {
     const chat = await this.findByIdOrFail(chatId)
     await this.deleteByIdOrFail(chatId)
 
-    await this.modelsInjector.chatMessageModel.deleteMany({ chatId })
-    this.chatsNotifications.emitChatDeleted(chat)
+    this.chatsEventsBus.chatDeleted$.next(chat)
 
     return chat
   }

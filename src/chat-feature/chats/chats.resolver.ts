@@ -44,7 +44,7 @@ export class ChatsResolver {
 
     const peersIds = [requesterId, otherUserId]
 
-    const chat = await this.chatsService.initIfNotExistsAndNotifyOrFail({ peersIds })
+    const chat = await this.chatsService.initIfNotExistsOrFail({ peersIds })
 
     return chat
   }
@@ -58,7 +58,7 @@ export class ChatsResolver {
 
     this.chatsService.failIfManageChatDenied({ chat, requesterId })
 
-    this.chatsService.deleteChatAndNotifyOrFail(chatId)
+    this.chatsService.deleteChatOrFail(chatId)
 
     return chat
   }
