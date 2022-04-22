@@ -29,7 +29,7 @@ interface ConcreteChatNotViewedChangedResponse {
 }
 
 @UseGuards(JwtWebsocketsAuthenticationGuard)
-@WebSocketGateway(appConfig.websockets.port, {
+@WebSocketGateway({
   cors: { origin: "*" }
 })
 export class ChatNotificationsGateway {

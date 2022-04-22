@@ -10,14 +10,13 @@ import { Request } from "express"
 import { Server } from "socket.io"
 import { AccessTokenPayload } from "src/auth/authentication/authentication.interface"
 import { JwtWebsocketsAuthenticationGuard } from "src/auth/authentication/guards/jwt-ws-authentication.guard"
-import { appConfig } from "src/common/config"
 import { WSRequest } from "src/common/decorators/ws/ws-request.decorator"
 import { ChatPermissionsCheckInput, ChatsService } from "../chats/chats.service"
 import { SendChatMessageInput } from "./message.input"
 import { ChatMessagesService } from "./messages.service"
 
 @UseGuards(JwtWebsocketsAuthenticationGuard)
-@WebSocketGateway(appConfig.websockets.port, {
+@WebSocketGateway({
   cors: { origin: "*" }
 })
 export class ChatMessagesGateway {

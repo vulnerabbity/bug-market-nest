@@ -7,7 +7,7 @@ import { appConfig } from "./common/config"
 // allow 40 requests per minute without delay
 const requestsLimiter = slowDown({
   windowMs: 60_000,
-  delayAfter: appConfig.core.slowdownAfter,
+  delayAfter: 1000,
   delayMs: 200
 })
 

@@ -28,9 +28,7 @@ export const appConfig = {
     port: process.env.PORT ?? 3000,
     slowdownAfter: Number(process.env.SLOWDOWN_AFTER ?? 50)
   },
-  websockets: {
-    port: Number(process.env.WSPORT ?? 3003)
-  },
+
   compression: {
     get imagesQuality(): number {
       return Number(process.env.IMAGES_QUALITY!)
